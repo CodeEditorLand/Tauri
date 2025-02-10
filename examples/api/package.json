@@ -11,7 +11,7 @@
 		"@codeeditorland/api": "../../packages/api/dist"
 	},
 	"devDependencies": {
-		"@iconify-json/codicon": "^1.2.8",
+		"@iconify-json/codicon": "^1.2.10",
 		"@iconify-json/ph": "^1.2.2",
 		"@playform/build": "0.2.1",
 		"@unocss/extractor-svelte": "^65.4.3",

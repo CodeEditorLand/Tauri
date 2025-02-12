@@ -8,6 +8,6 @@
 	"dependencies": {},
 	"devDependencies": {
 		"@playform/build": "0.2.1",
-		"wrangler": "3.107.3"
+		"wrangler": "3.108.1"
 	}
 }

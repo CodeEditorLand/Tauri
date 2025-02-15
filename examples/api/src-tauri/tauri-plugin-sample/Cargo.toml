@@ -1,19 +1,19 @@
-[package]
-name = "tauri-plugin-sample"
-version = "0.1.0"
-edition = "2021"
-links = "tauri-plugin-sample"
-
-[dependencies]
-tauri = { path = "../../../../crates/tauri" }
-log = { version = "0.4" }
-serde = { version = "1" }
-thiserror = { version = "2" }
-
 [build-dependencies]
 tauri-plugin = { path = "../../../../crates/tauri-plugin", features = [
 	"build",
 ] }
 
+[dependencies]
+log = { version = "0.4" }
+serde = { version = "1" }
+tauri = { path = "../../../../crates/tauri" }
+thiserror = { version = "2" }
+
 [lib]
 path = "Source/lib.rs"
+
+[package]
+edition = "2021"
+links = "tauri-plugin-sample"
+name = "tauri-plugin-sample"
+version = "0.1.0"

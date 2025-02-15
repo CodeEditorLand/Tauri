@@ -1,3 +1,33 @@
+[patch]
+
+[patch.crates-io]
+schemars_derive = { git = 'https://github.com/tauri-apps/schemars.git', branch = 'feat/preserve-description-newlines' }
+tauri = { path = "./crates/tauri" }
+
+[profile]
+
+[profile.dev]
+
+[profile.dev.package]
+
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+
+[profile.release]
+codegen-units = 1
+incremental = false
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
+
+[profile.release-size-optimized]
+codegen-units = 1
+incremental = false
+inherits = "release"
+lto = true
+opt-level = "s"
+
 [workspace]
 members = [
 	"crates/tauri",
@@ -38,36 +68,9 @@ resolver = "2"
 
 [workspace.package]
 authors = ["Tauri Programme within The Commons Conservancy"]
-homepage = "https://tauri.app/"
-repository = "https://github.com/tauri-apps/tauri"
 categories = ["gui", "web-programming"]
-license = "Apache-2.0 OR MIT"
-license-file = "LICENSE"
 edition = "2021"
+homepage = "https://tauri.app/"
+license-file = "LICENSE"
+repository = "https://github.com/tauri-apps/tauri"
 rust-version = "1.77.2"
-
-# default to small, optimized workspace release binaries
-[profile.release]
-panic = "abort"
-codegen-units = 1
-lto = true
-incremental = false
-opt-level = "s"
-strip = true
-
-# profiles for tauri-cli
-[profile.dev.package.miniz_oxide]
-opt-level = 3
-
-[profile.release-size-optimized]
-inherits = "release"
-codegen-units = 1
-lto = true
-incremental = false
-opt-level = "s"
-
-# Temporary patch to schemars to preserve newlines in docstrings for our reference docs schemas
-# See https://github.com/GREsau/schemars/issues/120 for reference
-[patch.crates-io]
-schemars_derive = { git = 'https://github.com/tauri-apps/schemars.git', branch = 'feat/preserve-description-newlines' }
-tauri = { path = "./crates/tauri" }

@@ -1,16 +1,3 @@
-[package]
-name = "tauri-driver"
-version = "2.0.3"
-authors = ["Tauri Programme within The Commons Conservancy"]
-categories = ["gui", "web-programming"]
-license-file = "LICENSE"
-homepage = "https://tauri.app"
-repository = "https://github.com/tauri-apps/tauri"
-description = "Webdriver server for Tauri applications"
-readme = "README.md"
-edition = "2021"
-rust-version = "1.77.2"
-
 [dependencies]
 anyhow = "1"
 futures = "0.3"
@@ -30,9 +17,26 @@ serde_json = { version = "1" }
 tokio = { version = "1", features = ["macros"] }
 which = "7"
 
+[lib]
+path = "Source/lib.rs"
+
+[package]
+authors = ["Tauri Programme within The Commons Conservancy"]
+categories = ["gui", "web-programming"]
+description = "Webdriver server for Tauri applications"
+edition = "2021"
+homepage = "https://tauri.app"
+license-file = "LICENSE"
+name = "tauri-driver"
+readme = "README.md"
+repository = "https://github.com/tauri-apps/tauri"
+rust-version = "1.77.2"
+version = "2.0.3"
+
+[target]
+
+[target."cfg(unix)"]
+
 [target."cfg(unix)".dependencies]
 signal-hook = "0.3"
 signal-hook-tokio = { version = "0.3", features = ["futures-v0_3"] }
-
-[lib]
-path = "Source/lib.rs"

@@ -1,62 +1,62 @@
-[package]
-name = "tauri-cli"
-version = "2.2.7"
-authors = ["Tauri Programme within The Commons Conservancy"]
-edition = "2021"
-rust-version = "1.77.2"
-categories = ["gui", "web-programming"]
-license-file = "LICENSE"
-homepage = "https://tauri.app"
-repository = "https://github.com/tauri-apps/tauri"
-description = "Command line interface for building Tauri apps"
-include = [
-	"src/",
-	"/templates",
-	"scripts/",
-	"*.json",
-	"*.rs",
-	"tauri.gitignore",
-	"tauri-dev-watcher.gitignore",
-	"LICENSE*",
-]
-
-[package.metadata.binstall]
-pkg-url = "{ repo }/releases/download/tauri-cli-v{ version }/cargo-tauri-{ target }.{ archive-format }"
-bin-dir = "{ bin }{ binary-ext }"
-pkg-fmt = "tgz"
-
-[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
-pkg-fmt = "zip"
-
-[package.metadata.binstall.overrides.x86_64-apple-darwin]
-pkg-fmt = "zip"
-
 [[bin]]
 name = "cargo-tauri"
 path = "src/main.rs"
 
-[target."cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\", target_os = \"windows\", target_os = \"macos\"))".dependencies]
-cargo-mobile2 = { version = "0.17", default-features = false }
-
 [dependencies]
-jsonrpsee = { version = "0.24", features = ["server"] }
-jsonrpsee-core = "0.24"
-jsonrpsee-client-transport = { version = "0.24", features = ["ws"] }
-jsonrpsee-ws-client = { version = "0.24", default-features = false }
-sublime_fuzzy = "0.7"
-clap_complete = "4"
-clap = { version = "4", features = ["derive", "env"] }
 anyhow = "1"
-tauri-bundler = { version = "2.2.3", default-features = false, path = "../tauri-bundler" }
+axum = { version = "0.7", features = ["ws"] }
+base64 = "0.22"
+clap = { version = "4", features = ["derive", "env"] }
+clap_complete = "4"
 colored = "2"
-serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["preserve_order"] }
+common-path = "1"
+css-color = "0.2"
+ctrlc = "3"
+dialoguer = "0.11"
+duct = "0.13"
+dunce = "1"
+elf = { version = "0.7" }
+env_logger = "0.11"
+glob = "0.3"
+handlebars = "6"
+heck = "0.5"
+html5ever = "0.26"
+icns = { package = "tauri-icns", version = "0.1" }
+ignore = "0.4"
+image = { version = "0.25", default-features = false, features = ["ico"] }
+include_dir = "0.7"
+itertools = "0.13"
+json-patch = "3"
+jsonrpsee = { version = "0.24", features = ["server"] }
+jsonrpsee-client-transport = { version = "0.24", features = ["ws"] }
+jsonrpsee-core = "0.24"
+jsonrpsee-ws-client = { version = "0.24", default-features = false }
+jsonschema = "0.28"
+kuchiki = { package = "kuchikiki", version = "0.8" }
+local-ip-address = "0.6"
+log = { version = "0.4.21", features = ["kv", "kv_std"] }
+magic_string = "0.3"
+memchr = { version = "2" }
+minisign = "=0.7.3"
 notify = "8"
 notify-debouncer-full = "0.5"
+os_info = "3"
+os_pipe = "1"
+oxc_allocator = "0.36"
+oxc_ast = "0.36"
+oxc_parser = "0.36"
+oxc_span = "0.36"
+phf = { version = "0.11", features = ["macros"] }
+rand = { version = "0.8" }
+regex = "1"
+resvg = "0.44.0"
+semver = "1"
+serde = { version = "1", features = ["derive"] }
+serde-value = "0.7"
+serde_json = { version = "1", features = ["preserve_order"] }
 shared_child = "1"
-duct = "0.13"
-toml_edit = { version = "0.22", features = ["serde"] }
-json-patch = "3"
+sublime_fuzzy = "0.7"
+tauri-bundler = { version = "2.2.3", default-features = false, path = "../tauri-bundler" }
 tauri-utils = { version = "2.1.1", path = "../tauri-utils", features = [
   "isolation",
   "schema",
@@ -69,76 +69,18 @@ tauri-utils-v1 = { version = "1", package = "tauri-utils", features = [
 	"config-json5",
 	"config-toml",
 ] }
-toml = "0.8"
-jsonschema = "0.28"
-handlebars = "6"
-include_dir = "0.7"
-minisign = "=0.7.3"
-base64 = "0.22"
-ureq = { version = "3", default-features = false, features = ["gzip"] }
-os_info = "3"
-semver = "1"
-regex = "1"
-heck = "0.5"
-dialoguer = "0.11"
-url = { version = "2", features = ["serde"] }
-os_pipe = "1"
-ignore = "0.4"
-ctrlc = "3"
-log = { version = "0.4.21", features = ["kv", "kv_std"] }
-env_logger = "0.11"
-icns = { package = "tauri-icns", version = "0.1" }
-image = { version = "0.25", default-features = false, features = ["ico"] }
-axum = { version = "0.7", features = ["ws"] }
-html5ever = "0.26"
-kuchiki = { package = "kuchikiki", version = "0.8" }
-tokio = { version = "1", features = ["macros", "sync"] }
-common-path = "1"
-serde-value = "0.7"
-itertools = "0.13"
-local-ip-address = "0.6"
-css-color = "0.2"
-resvg = "0.44.0"
-dunce = "1"
-glob = "0.3"
-# 0.39 raised msrv to above 1.78 but 0.37+ can't compile on 1.77.2 either.
-oxc_parser = "0.36"
-oxc_span = "0.36"
-oxc_allocator = "0.36"
-oxc_ast = "0.36"
-magic_string = "0.3"
-phf = { version = "0.11", features = ["macros"] }
-walkdir = { version = "2" }
-elf = { version = "0.7" }
-memchr = { version = "2" }
 tempfile = { version = "3" }
+tokio = { version = "1", features = ["macros", "sync"] }
+toml = "0.8"
+toml_edit = { version = "0.22", features = ["serde"] }
+ureq = { version = "3", default-features = false, features = ["gzip"] }
+url = { version = "2", features = ["serde"] }
 uuid = { version = "1", features = ["v5"] }
-rand = { version = "0.8" }
+walkdir = { version = "2" }
 
 [dev-dependencies]
 insta = { version = "1" }
 pretty_assertions = { version = "1" }
-
-[target."cfg(windows)".dependencies.windows-sys]
-version = "0.59"
-features = [
-	"Win32_Storage_FileSystem",
-	"Win32_System_IO",
-	"Win32_System_Console",
-]
-
-[target."cfg(unix)".dependencies]
-libc = { version = "0.2" }
-
-[target."cfg(target_os = \"macos\")".dependencies]
-plist = { version = "1" }
-tauri-macos-sign = { version = "2.0.1", path = "../tauri-macos-sign" }
-object = { version = "0.36", default-features = false, features = [
-	"macho",
-	"read_core",
-	"std",
-] }
-ar = { version = "0.9" }
 
 [features]
 default = ["rustls"]
@@ -149,3 +91,79 @@ native-tls = [
 ]
 native-tls-vendored = ["native-tls", "tauri-bundler/native-tls-vendored"]
 rustls = ["tauri-bundler/rustls", "cargo-mobile2/rustls", "ureq/rustls"]
+
+[lib]
+path = "Source/lib.rs"
+
+[package]
+authors = ["Tauri Programme within The Commons Conservancy"]
+categories = ["gui", "web-programming"]
+description = "Command line interface for building Tauri apps"
+edition = "2021"
+homepage = "https://tauri.app"
+include = [
+	"src/",
+	"/templates",
+	"scripts/",
+	"*.json",
+	"*.rs",
+	"tauri.gitignore",
+	"tauri-dev-watcher.gitignore",
+	"LICENSE*",
+]
+license-file = "LICENSE"
+name = "tauri-cli"
+repository = "https://github.com/tauri-apps/tauri"
+rust-version = "1.77.2"
+version = "2.2.7"
+
+[package.metadata]
+
+[package.metadata.binstall]
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+pkg-url = "{ repo }/releases/download/tauri-cli-v{ version }/cargo-tauri-{ target }.{ archive-format }"
+
+[package.metadata.binstall.overrides]
+
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-fmt = "zip"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
+[target]
+
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "windows", target_os = "macos"))']
+
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "windows", target_os = "macos"))'.dependencies]
+cargo-mobile2 = { version = "0.17", default-features = false }
+
+[target.'cfg(target_os = "macos")']
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ar = { version = "0.9" }
+object = { version = "0.36", default-features = false, features = [
+	"macho",
+	"read_core",
+	"std",
+] }
+plist = { version = "1" }
+tauri-macos-sign = { version = "2.0.1", path = "../tauri-macos-sign" }
+
+[target."cfg(unix)"]
+
+[target."cfg(unix)".dependencies]
+libc = { version = "0.2" }
+
+[target."cfg(windows)"]
+
+[target."cfg(windows)".dependencies]
+
+[target."cfg(windows)".dependencies.windows-sys]
+features = [
+	"Win32_Storage_FileSystem",
+	"Win32_System_IO",
+	"Win32_System_Console",
+]
+version = "0.59"

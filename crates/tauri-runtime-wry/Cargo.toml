@@ -1,66 +1,18 @@
-[package]
-name = "tauri-runtime-wry"
-version = "2.3.0"
-description = "Wry bindings to the Tauri runtime"
-exclude = ["CHANGELOG.md", "/target"]
-readme = "README.md"
-authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-categories.workspace = true
-license-file.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-
-[package.metadata.docs.rs]
-rustc-args = ["--cfg", "docsrs"]
-rustdoc-args = ["--cfg", "docsrs"]
-
 [dependencies]
+http = "1"
+log = "0.4.21"
+raw-window-handle = "0.6"
+tao = { version = "0.31.0", default-features = false, features = ["rwh_06"] }
+tauri-runtime = { version = "2.3.0", path = "../tauri-runtime" }
+tauri-utils = { version = "2.1.1", path = "../tauri-utils" }
+tracing = { version = "0.1", optional = true }
+url = "2"
 wry = { version = "0.48.1", default-features = false, features = [
   "drag-drop",
   "protocol",
   "os-webview",
   "linux-body",
 ] }
-tao = { version = "0.31.0", default-features = false, features = ["rwh_06"] }
-tauri-runtime = { version = "2.3.0", path = "../tauri-runtime" }
-tauri-utils = { version = "2.1.1", path = "../tauri-utils" }
-raw-window-handle = "0.6"
-http = "1"
-url = "2"
-tracing = { version = "0.1", optional = true }
-log = "0.4.21"
-
-[target."cfg(windows)".dependencies]
-webview2-com = "0.34"
-softbuffer = { version = "0.4", default-features = false }
-
-[target."cfg(windows)".dependencies.windows]
-version = "0.58"
-features = ["Win32_Foundation", "Win32_Graphics_Dwm"]
-
-[target."cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\"))".dependencies]
-gtk = { version = "0.18", features = ["v3_24"] }
-webkit2gtk = { version = "=2.0", features = ["v2_40"] }
-percent-encoding = "2"
-
-[target.'cfg(target_vendor = "apple")'.dependencies]
-objc2 = "0.5"
-
-[target.'cfg(target_os = "macos")'.dependencies]
-objc2-foundation = { version = "0.2", features = [] }
-objc2-app-kit = { version = "0.2", features = [
-  "block2",
-  "NSApplication",
-  "NSResponder",
-  "NSView",
-  "NSWindow",
-  "NSGraphics",
-] }
-
-[target."cfg(target_os = \"android\")".dependencies]
-jni = { version = "0.21" }
 
 [features]
 devtools = ["wry/devtools", "tauri-runtime/devtools"]
@@ -69,10 +21,88 @@ macos-private-api = [
 	"wry/transparent",
 	"tauri-runtime/macos-private-api",
 ]
+macos-proxy = ["wry/mac-proxy"]
 objc-exception = ["wry/objc-exception"]
 tracing = ["dep:tracing", "wry/tracing"]
-macos-proxy = ["wry/mac-proxy"]
 unstable = []
 
 [lib]
 path = "Source/lib.rs"
+
+[package]
+description = "Wry bindings to the Tauri runtime"
+exclude = ["CHANGELOG.md", "/target"]
+name = "tauri-runtime-wry"
+readme = "README.md"
+version = "2.3.0"
+
+[package.authors]
+workspace = true
+
+[package.categories]
+workspace = true
+
+[package.edition]
+workspace = true
+
+[package.homepage]
+workspace = true
+
+[package.license-file]
+workspace = true
+
+[package.metadata]
+
+[package.metadata.docs]
+
+[package.metadata.docs.rs]
+rustc-args = ["--cfg", "docsrs"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.repository]
+workspace = true
+
+[package.rust-version]
+workspace = true
+
+[target]
+
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))']
+
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
+gtk = { version = "0.18", features = ["v3_24"] }
+percent-encoding = "2"
+webkit2gtk = { version = "=2.0", features = ["v2_40"] }
+
+[target.'cfg(target_os = "android")']
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = { version = "0.21" }
+
+[target.'cfg(target_os = "macos")']
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-app-kit = { version = "0.2", features = [
+  "block2",
+  "NSApplication",
+  "NSResponder",
+  "NSView",
+  "NSWindow",
+  "NSGraphics",
+] }
+objc2-foundation = { version = "0.2", features = [] }
+
+[target.'cfg(target_vendor = "apple")']
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+objc2 = "0.5"
+
+[target."cfg(windows)"]
+
+[target."cfg(windows)".dependencies]
+softbuffer = { version = "0.4", default-features = false }
+webview2-com = "0.34"
+
+[target."cfg(windows)".dependencies.windows]
+features = ["Win32_Foundation", "Win32_Graphics_Dwm"]
+version = "0.58"

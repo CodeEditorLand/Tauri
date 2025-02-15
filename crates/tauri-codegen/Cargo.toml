@@ -1,50 +1,68 @@
-[package]
-name = "tauri-codegen"
-version = "2.0.4"
-description = "code generation meant to be consumed inside of `tauri` through `tauri-build` or `tauri-macros`"
-exclude = ["CHANGELOG.md", "/target"]
-readme = "README.md"
-authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-categories.workspace = true
-license-file.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-
 [dependencies]
-sha2 = { version = "0.10" }
 base64 = { version = "0.22" }
+brotli = { version = "7", optional = true, default-features = false, features = [
+	"std",
+] }
+ico = "0.4"
+json-patch = "3"
+png = "0.17"
 proc-macro2 = "1"
 quote = { version = "1" }
-syn = { version = "2" }
+regex = { version = "1", optional = true }
+semver = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sha2 = { version = "0.10" }
+syn = { version = "2" }
 tauri-utils = { version = "2.1.1", path = "../tauri-utils", features = [
   "build",
 ] }
 thiserror = { version = "2" }
-walkdir = { version = "2" }
-brotli = { version = "7", optional = true, default-features = false, features = [
-	"std",
-] }
-regex = { version = "1", optional = true }
-uuid = { version = "1", features = ["v4"] }
-semver = "1"
-ico = "0.4"
-png = "0.17"
-json-patch = "3"
 url = "2"
-
-[target."cfg(target_os = \"macos\")".dependencies]
-plist = { version = "1" }
-time = { version = "0.3", features = ["parsing", "formatting"] }
+uuid = { version = "1", features = ["v4"] }
+walkdir = { version = "2" }
 
 [features]
 compression = ["brotli", "tauri-utils/compression"]
-isolation = ["tauri-utils/isolation"]
 config-json5 = ["tauri-utils/config-json5"]
 config-toml = ["tauri-utils/config-toml"]
+isolation = ["tauri-utils/isolation"]
 
 [lib]
 path = "Source/lib.rs"
+
+[package]
+description = "code generation meant to be consumed inside of `tauri` through `tauri-build` or `tauri-macros`"
+exclude = ["CHANGELOG.md", "/target"]
+name = "tauri-codegen"
+readme = "README.md"
+version = "2.0.4"
+
+[package.authors]
+workspace = true
+
+[package.categories]
+workspace = true
+
+[package.edition]
+workspace = true
+
+[package.homepage]
+workspace = true
+
+[package.license-file]
+workspace = true
+
+[package.repository]
+workspace = true
+
+[package.rust-version]
+workspace = true
+
+[target]
+
+[target.'cfg(target_os = "macos")']
+
+[target.'cfg(target_os = "macos")'.dependencies]
+plist = { version = "1" }
+time = { version = "0.3", features = ["parsing", "formatting"] }

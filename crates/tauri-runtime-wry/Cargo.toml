@@ -1,8 +1,8 @@
 [dependencies]
 http = "1"
-log = "0.4.21"
+log = "0.4.25"
 raw-window-handle = "0.6"
-tao = { version = "0.31.0", default-features = false, features = ["rwh_06"] }
+tao = { version = "0.31.1", default-features = false, features = ["rwh_06"] }
 tauri-runtime = { version = "2.3.0", path = "../tauri-runtime" }
 tauri-utils = { version = "2.1.1", path = "../tauri-utils" }
 tracing = { version = "0.1", optional = true }
@@ -82,7 +82,7 @@ jni = { version = "0.21" }
 [target.'cfg(target_os = "macos")']
 
 [target.'cfg(target_os = "macos")'.dependencies]
-objc2-app-kit = { version = "0.2", features = [
+objc2-app-kit = { version = "0.3", features = [
   "block2",
   "NSApplication",
   "NSResponder",
@@ -90,19 +90,19 @@ objc2-app-kit = { version = "0.2", features = [
   "NSWindow",
   "NSGraphics",
 ] }
-objc2-foundation = { version = "0.2", features = [] }
+objc2-foundation = { version = "0.3", features = [] }
 
 [target.'cfg(target_vendor = "apple")']
 
 [target.'cfg(target_vendor = "apple")'.dependencies]
-objc2 = "0.5"
+objc2 = "0.6"
 
 [target."cfg(windows)"]
 
 [target."cfg(windows)".dependencies]
 softbuffer = { version = "0.4", default-features = false }
-webview2-com = "0.34"
+webview2-com = "0.35"
 
 [target."cfg(windows)".dependencies.windows]
 features = ["Win32_Foundation", "Win32_Graphics_Dwm"]
-version = "0.58"
+version = "0.59"

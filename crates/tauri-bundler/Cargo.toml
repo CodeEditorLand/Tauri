@@ -6,7 +6,7 @@ flate2 = "1"
 handlebars = "6"
 hex = "0.4"
 image = "0.25"
-log = { version = "0.4.21", features = ["kv"] }
+log = { version = "0.4.25", features = ["kv"] }
 native-tls = { version = "0.2", optional = true }
 os_pipe = "1"
 regex = { version = "1" }
@@ -45,13 +45,13 @@ authors = [
 ]
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
 description = "Wrap rust executables in OS-specific app bundles for Tauri"
-edition = "2021"
+edition = "2024"
 exclude = ["CHANGELOG.md", "/target", "rustfmt.toml"]
 keywords = ["bundle", "cargo", "tauri"]
 license-file = "LICENSE"
 name = "tauri-bundler"
 repository = "https://github.com/tauri-apps/tauri"
-rust-version = "1.77.2"
+rust-version = "1.85.0"
 version = "2.2.3"
 
 [target]

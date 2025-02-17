@@ -11,7 +11,7 @@ path = "Source/main.rs"
 
 [package]
 description = "A Tauri application that uses Node.js with app resources"
-edition = "2021"
+edition = "2024"
 name = "resources"
-rust-version = "1.77.2"
+rust-version = "1.85.0"
 version = "0.1.0"

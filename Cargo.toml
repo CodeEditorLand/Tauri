@@ -69,8 +69,8 @@ resolver = "2"
 [workspace.package]
 authors = ["Tauri Programme within The Commons Conservancy"]
 categories = ["gui", "web-programming"]
-edition = "2021"
+edition = "2024"
 homepage = "https://tauri.app/"
 license-file = "LICENSE"
 repository = "https://github.com/tauri-apps/tauri"
-rust-version = "1.77.2"
+rust-version = "1.85.0"

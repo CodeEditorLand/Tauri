@@ -1,6 +1,6 @@
 [dependencies]
 anyhow = "1"
-axum = { version = "0.7", default-features = false }
+axum = { version = "0.8", default-features = false }
 console_error_panic_hook = { version = "0.1" }
 semver = { version = "1", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
@@ -20,7 +20,7 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 ] }
 
 [package]
-edition = "2021"
+edition = "2024"
 name = "tauri-schema-worker"
 publish = false
 version = "0.0.0"

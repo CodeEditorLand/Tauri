@@ -13,7 +13,7 @@ thiserror = { version = "2" }
 path = "Source/lib.rs"
 
 [package]
-edition = "2021"
+edition = "2024"
 links = "tauri-plugin-sample"
 name = "tauri-plugin-sample"
 version = "0.1.0"

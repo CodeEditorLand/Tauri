@@ -12,13 +12,13 @@ data-url = { version = "0.3", optional = true }
 dirs = "6"
 dunce = "1"
 futures-util = "0.3"
-getrandom = "0.2"
+getrandom = "0.3"
 glob = { version = "0.3" }
 heck = "0.5"
 http = "1"
 http-range = { version = "0.1", optional = true }
 image = { version = "0.25", default-features = false, optional = true }
-log = "0.4.21"
+log = "0.4.25"
 mime = { version = "0.3" }
 percent-encoding = "2"
 raw-window-handle = { version = "0.6", features = ["std"] }
@@ -26,7 +26,7 @@ serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["raw_value"] }
 serde_repr = "0.1"
 serialize-to-javascript = "=0.1.1"
-specta = { version = "^2.0.0-rc.16", optional = true, default-features = false, features = [
+specta = { version = "^2.0.0-rc.22", optional = true, default-features = false, features = [
   "function",
   "derive",
 ] }
@@ -242,8 +242,8 @@ jni = "0.21"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 embed_plist = "1.2"
-objc2 = "0.5"
-objc2-app-kit = { version = "0.2", default-features = false, features = [
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", default-features = false, features = [
   "std",
   "NSApplication",
   "NSColor",
@@ -252,7 +252,7 @@ objc2-app-kit = { version = "0.2", default-features = false, features = [
   "NSWindow",
   "NSImage",
 ] }
-objc2-foundation = { version = "0.2", default-features = false, features = [
+objc2-foundation = { version = "0.3", default-features = false, features = [
   "std",
   "NSData",
   "NSThread",
@@ -261,7 +261,7 @@ plist = "1"
 window-vibrancy = "0.5"
 
 [target.'cfg(target_os = "macos")'.dev-dependencies]
-objc2-web-kit = { version = "0.2", features = [
+objc2-web-kit = { version = "0.3", features = [
   "objc2-app-kit",
   "WKWebView",
   "WKUserContentController",
@@ -270,6 +270,6 @@ objc2-web-kit = { version = "0.2", features = [
 [target."cfg(windows)"]
 
 [target."cfg(windows)".dependencies]
-webview2-com = "0.34"
+webview2-com = "0.35"
 window-vibrancy = "0.5"
-windows = { version = "0.58", features = ["Win32_Foundation"] }
+windows = { version = "0.59", features = ["Win32_Foundation"] }

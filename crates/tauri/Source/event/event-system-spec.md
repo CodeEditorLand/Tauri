@@ -24,11 +24,14 @@ Emitters can emit to any and all listeners.
 - `Window`
 - `Webview`
 - `WebviewWindow`
-- Any type that implements `Manager` trait but is limited to only using `listen_any/once_any`.
+- Any type that implements `Manager` trait but is limited to only using
+  `listen_any/once_any`.
 
 ## Listen functions
 
 - `listen`: Listens to all events targeting this listener type only.
 - `once`: Listens to a single event targeting this listener type only.
-- `listen_any` (available only through `Manager` trait): Listens to all events to any target (aka event sniffer).
-- `once_any` (available only through `Manager` trait): Listens to a single event to any target (aka event sniffer).
+- `listen_any` (available only through `Manager` trait): Listens to all events
+  to any target (aka event sniffer).
+- `once_any` (available only through `Manager` trait): Listens to a single event
+  to any target (aka event sniffer).

@@ -15,7 +15,6 @@ Default permissions for the plugin.
 <th>Description</th>
 </tr>
 
-
 <tr>
 <td>
 
@@ -206,7 +205,8 @@ Denies the reparent command without any pre-configured scope.
 </td>
 <td>
 
-Enables the set_webview_background_color command without any pre-configured scope.
+Enables the set_webview_background_color command without any pre-configured
+scope.
 
 </td>
 </tr>
@@ -219,7 +219,8 @@ Enables the set_webview_background_color command without any pre-configured scop
 </td>
 <td>
 
-Denies the set_webview_background_color command without any pre-configured scope.
+Denies the set_webview_background_color command without any pre-configured
+scope.
 
 </td>
 </tr>

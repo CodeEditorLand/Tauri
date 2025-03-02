@@ -22,7 +22,6 @@ Default permissions for the plugin.
 <th>Description</th>
 </tr>
 
-
 <tr>
 <td>
 
@@ -187,7 +186,8 @@ Denies the set_menu command without any pre-configured scope.
 </td>
 <td>
 
-Enables the set_show_menu_on_left_click command without any pre-configured scope.
+Enables the set_show_menu_on_left_click command without any pre-configured
+scope.
 
 </td>
 </tr>

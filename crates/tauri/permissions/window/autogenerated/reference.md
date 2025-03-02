@@ -36,7 +36,6 @@ Default permissions for the plugin.
 <th>Description</th>
 </tr>
 
-
 <tr>
 <td>
 
@@ -1709,7 +1708,8 @@ Denies the set_title_bar_style command without any pre-configured scope.
 </td>
 <td>
 
-Enables the set_visible_on_all_workspaces command without any pre-configured scope.
+Enables the set_visible_on_all_workspaces command without any pre-configured
+scope.
 
 </td>
 </tr>
@@ -1722,7 +1722,8 @@ Enables the set_visible_on_all_workspaces command without any pre-configured sco
 </td>
 <td>
 
-Denies the set_visible_on_all_workspaces command without any pre-configured scope.
+Denies the set_visible_on_all_workspaces command without any pre-configured
+scope.
 
 </td>
 </tr>

@@ -1,43 +1,46 @@
+[package]
+name = "tauri-cli"
+version = "2.3.1"
+authors = ["Tauri Programme within The Commons Conservancy"]
+edition = "2021"
+rust-version = "1.77.2"
+categories = ["gui", "web-programming"]
+license = "Apache-2.0 OR MIT"
+homepage = "https://tauri.app"
+repository = "https://github.com/tauri-apps/tauri"
+description = "Command line interface for building Tauri apps"
+include = [
+  "src/",
+  "/templates",
+  "scripts/",
+  "*.json",
+  "*.rs",
+  "tauri.gitignore",
+  "tauri-dev-watcher.gitignore",
+  "LICENSE*",
+]
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/tauri-cli-v{ version }/cargo-tauri-{ target }.{ archive-format }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-fmt = "zip"
+
 [[bin]]
 name = "cargo-tauri"
 path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
-axum = { version = "0.8", features = ["ws"] }
-base64 = "0.22"
-clap = { version = "4", features = ["derive", "env"] }
-clap_complete = "4"
-colored = "3"
-common-path = "1"
-css-color = "0.2"
-ctrlc = "3"
-dialoguer = "0.11"
-duct = "0.13"
-dunce = "1"
-elf = { version = "0.7" }
-env_logger = "0.11"
-glob = "0.3"
-handlebars = "6"
-heck = "0.5"
-html5ever = "0.29"
-icns = { package = "tauri-icns", version = "0.1" }
-ignore = "0.4"
-image = { version = "0.25", default-features = false, features = ["ico"] }
-include_dir = "0.7"
-itertools = "0.14"
-json-patch = "3"
-jsonrpsee = { version = "0.24", features = ["server"] }
-jsonrpsee-client-transport = { version = "0.24", features = ["ws"] }
-jsonrpsee-core = "0.24"
-jsonrpsee-ws-client = { version = "0.24", default-features = false }
-jsonschema = "0.29"
-kuchiki = { package = "kuchikiki", version = "0.8" }
-local-ip-address = "0.6"
-log = { version = "0.4.25", features = ["kv", "kv_std"] }
-magic_string = "0.3"
-memchr = { version = "2" }
-minisign = "=0.7.3"
+tauri-bundler = { version = "2.2.4", default-features = false, path = "../tauri-bundler" }
+colored = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
 notify = "8"
 notify-debouncer-full = "0.5"
 os_info = "3"
@@ -55,9 +58,10 @@ serde = { version = "1", features = ["derive"] }
 serde-value = "0.7"
 serde_json = { version = "1", features = ["preserve_order"] }
 shared_child = "1"
-sublime_fuzzy = "0.7"
-tauri-bundler = { version = "2.2.3", default-features = false, path = "../tauri-bundler" }
-tauri-utils = { version = "2.1.1", path = "../tauri-utils", features = [
+duct = "0.13"
+toml_edit = { version = "0.22", features = ["serde"] }
+json-patch = "3"
+tauri-utils = { version = "2.2.0", path = "../tauri-utils", features = [
   "isolation",
   "schema",
   "config-json5",
@@ -93,16 +97,52 @@ axum = { version = "0.7", features = ["ws"] }
 html5ever = "0.26"
 kuchiki = { package = "kuchikiki", version = "0.8" }
 tokio = { version = "1", features = ["macros", "sync"] }
-toml = "0.8"
-toml_edit = { version = "0.22", features = ["serde"] }
-ureq = { version = "3", default-features = false, features = ["gzip"] }
-url = { version = "2", features = ["serde"] }
+common-path = "1"
+serde-value = "0.7"
+itertools = "0.13"
+local-ip-address = "0.6"
+css-color = "0.2"
+resvg = "0.45.0"
+dunce = "1"
+glob = "0.3"
+# 0.39 raised msrv to above 1.78 but 0.37+ can't compile on 1.77.2 either.
+oxc_parser = "0.36"
+oxc_span = "0.36"
+oxc_allocator = "0.36"
+oxc_ast = "0.36"
+magic_string = "0.3"
+phf = { version = "0.11", features = ["macros"] }
+walkdir = "2"
+elf = "0.7"
+memchr = "2"
+tempfile = "3"
 uuid = { version = "1", features = ["v5"] }
 walkdir = { version = "2" }
 
 [dev-dependencies]
-insta = { version = "1" }
-pretty_assertions = { version = "1" }
+insta = "1"
+pretty_assertions = "1"
+
+[target."cfg(windows)".dependencies.windows-sys]
+version = "0.59"
+features = [
+  "Win32_Storage_FileSystem",
+  "Win32_System_IO",
+  "Win32_System_Console",
+]
+
+[target."cfg(unix)".dependencies]
+libc = "0.2"
+
+[target."cfg(target_os = \"macos\")".dependencies]
+plist = "1"
+tauri-macos-sign = { version = "2.1.0", path = "../tauri-macos-sign" }
+object = { version = "0.36", default-features = false, features = [
+  "macho",
+  "read_core",
+  "std",
+] }
+ar = "0.9"
 
 [features]
 default = ["rustls"]

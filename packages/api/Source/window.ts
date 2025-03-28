@@ -441,7 +441,7 @@ class Window {
    * @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
    * @param payload Event payload.
    */
-  async emit(event: string, payload?: unknown): Promise<void> {
+  async emit<T>(event: string, payload?: T): Promise<void> {
     if (localTauriEvents.includes(event)) {
       // eslint-disable-next-line
       for (const handler of this.listeners[event] || []) {
@@ -453,7 +453,7 @@ class Window {
       }
       return
     }
-    return emit(event, payload)
+    return emit<T>(event, payload)
   }
 
   /**
@@ -468,10 +468,10 @@ class Window {
    * @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
    * @param payload Event payload.
    */
-  async emitTo(
+  async emitTo<T>(
     target: string | EventTarget,
     event: string,
-    payload?: unknown
+    payload?: T
   ): Promise<void> {
     if (localTauriEvents.includes(event)) {
       // eslint-disable-next-line security/detect-object-injection
@@ -484,7 +484,7 @@ class Window {
       }
       return
     }
-    return emitTo(target, event, payload)
+    return emitTo<T>(target, event, payload)
   }
 
   /** @ignore */
@@ -795,6 +795,22 @@ class Window {
    */
   async theme(): Promise<Theme | null> {
     return invoke('plugin:window|theme', {
+      label: this.label
+    })
+  }
+
+  /**
+   * Whether the window is configured to be always on top of other windows or not.
+   * @example
+   * ```typescript
+   * import { getCurrentWindow } from '@tauri-apps/api/window';
+   * const alwaysOnTop = await getCurrentWindow().isAlwaysOnTop();
+   * ```
+   *
+   * @returns Whether the window is visible or not.
+   */
+  async isAlwaysOnTop(): Promise<boolean> {
+    return invoke('plugin:window|is_always_on_top', {
       label: this.label
     })
   }

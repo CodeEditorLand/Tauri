@@ -69,8 +69,33 @@ resolver = "2"
 [workspace.package]
 authors = ["Tauri Programme within The Commons Conservancy"]
 categories = ["gui", "web-programming"]
-edition = "2024"
-homepage = "https://tauri.app/"
-license-file = "LICENSE"
-repository = "https://github.com/tauri-apps/tauri"
-rust-version = "1.85.0"
+license = "Apache-2.0 OR MIT"
+edition = "2021"
+rust-version = "1.77.2"
+
+# default to small, optimized workspace release binaries
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+incremental = false
+opt-level = "s"
+strip = true
+
+# profiles for tauri-cli
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+
+[profile.release-size-optimized]
+inherits = "release"
+codegen-units = 1
+lto = true
+incremental = false
+opt-level = "s"
+
+# Temporary patch to schemars to preserve newlines in docstrings for our reference docs schemas
+# See https://github.com/GREsau/schemars/issues/120 for reference
+[patch.crates-io]
+schemars_derive = { git = 'https://github.com/tauri-apps/schemars.git', branch = 'feat/preserve-description-newlines' }
+tauri = { path = "./crates/tauri" }
+tauri-plugin = { path = "./crates/tauri-plugin" }

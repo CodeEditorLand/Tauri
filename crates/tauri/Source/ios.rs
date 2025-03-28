@@ -9,7 +9,7 @@ use std::{
 
 use swift_rs::{SRString, SwiftArg, swift};
 
-type PluginMessageCallbackFn = unsafe extern fn(c_int, c_int, *const c_char);
+type PluginMessageCallbackFn = unsafe extern "C" fn(c_int, c_int, *const c_char);
 pub struct PluginMessageCallback(pub PluginMessageCallbackFn);
 
 impl<'a> SwiftArg<'a> for PluginMessageCallback {
@@ -18,7 +18,7 @@ impl<'a> SwiftArg<'a> for PluginMessageCallback {
 	unsafe fn as_arg(&'a self) -> Self::ArgType { self.0 }
 }
 
-type ChannelSendDataCallbackFn = unsafe extern fn(c_ulonglong, *const c_char);
+type ChannelSendDataCallbackFn = unsafe extern "C" fn(c_ulonglong, *const c_char);
 pub struct ChannelSendDataCallback(pub ChannelSendDataCallbackFn);
 
 impl<'a> SwiftArg<'a> for ChannelSendDataCallback {

@@ -512,6 +512,17 @@ pub struct Position {
   pub y: u32,
 }
 
+/// Position coordinates struct.
+#[derive(Default, Debug, PartialEq, Clone, Deserialize, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LogicalPosition {
+  /// X coordinate.
+  pub x: f64,
+  /// Y coordinate.
+  pub y: f64,
+}
+
 /// Size of the window.
 #[derive(Default, Debug, PartialEq, Eq, Clone, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -1476,7 +1487,7 @@ pub struct WindowConfig {
   /// Whether Tauri should create this window at app startup or not.
   ///
   /// When this is set to `false` you must manually grab the config object via `app.config().app.windows`
-  /// and create it with [`WebviewWindowBuilder::from_config`](https://docs.rs/tauri/2.0.0-rc/tauri/webview/struct.WebviewWindowBuilder.html#method.from_config).
+  /// and create it with [`WebviewWindowBuilder::from_config`](https://docs.rs/tauri/2/tauri/webview/struct.WebviewWindowBuilder.html#method.from_config).
   #[serde(default = "default_true")]
   pub create: bool,
   /// The window webview URL.
@@ -1593,6 +1604,11 @@ pub struct WindowConfig {
   /// The style of the macOS title bar.
   #[serde(default, alias = "title-bar-style")]
   pub title_bar_style: TitleBarStyle,
+  /// The position of the window controls on macOS.
+  ///
+  /// Requires titleBarStyle: Overlay and decorations: true.
+  #[serde(default, alias = "traffic-light-position")]
+  pub traffic_light_position: Option<LogicalPosition>,
   /// If `true`, sets the window title to be hidden on macOS.
   #[serde(default, alias = "hidden-title")]
   pub hidden_title: bool,
@@ -1769,6 +1785,7 @@ impl Default for WindowConfig {
       window_classname: None,
       theme: None,
       title_bar_style: Default::default(),
+      traffic_light_position: None,
       hidden_title: false,
       accept_first_mouse: false,
       tabbing_identifier: None,
@@ -2696,6 +2713,15 @@ pub struct BuildConfig {
   pub before_bundle_command: Option<HookCommand>,
   /// Features passed to `cargo` commands.
   pub features: Option<Vec<String>>,
+  /// Try to remove unused commands registered from plugins base on the ACL list during `tauri build`,
+  /// the way it works is that tauri-cli will read this and set the environment variables for the build script and macros,
+  /// and they'll try to get all the allowed commands and remove the rest
+  ///
+  /// Note:
+  ///   - This won't be accounting for dynamically added ACLs so make sure to check it when using this
+  ///   - This feature requires tauri-plugin 2.1 and tauri 2.4
+  #[serde(alias = "remove-unused-commands", default)]
+  pub remove_unused_commands: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -2858,7 +2884,7 @@ pub struct Config {
   #[serde(default)]
   pub app: AppConfig,
   /// The build configuration.
-  #[serde(default = "default_build")]
+  #[serde(default)]
   pub build: BuildConfig,
   /// The bundler configuration.
   #[serde(default)]
@@ -2874,18 +2900,6 @@ pub struct Config {
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 pub struct PluginConfig(pub HashMap<String, JsonValue>);
-
-fn default_build() -> BuildConfig {
-  BuildConfig {
-    runner: None,
-    dev_url: None,
-    frontend_dist: None,
-    before_dev_command: None,
-    before_build_command: None,
-    before_bundle_command: None,
-    features: None,
-  }
-}
 
 /// Implement `ToTokens` for all config structs, allowing a literal `Config` to be built.
 ///
@@ -2981,6 +2995,13 @@ mod build {
     }
   }
 
+  impl ToTokens for LogicalPosition {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+      let LogicalPosition { x, y } = self;
+      literal_struct!(tokens, ::tauri::utils::config::LogicalPosition, x, y)
+    }
+  }
+
   impl ToTokens for crate::WindowEffect {
     fn to_tokens(&self, tokens: &mut TokenStream) {
       let prefix = quote! { ::tauri::utils::WindowEffect };
@@ -3067,6 +3088,7 @@ mod build {
       let window_classname = opt_str_lit(self.window_classname.as_ref());
       let theme = opt_lit(self.theme.as_ref());
       let title_bar_style = &self.title_bar_style;
+      let traffic_light_position = opt_lit(self.traffic_light_position.as_ref());
       let hidden_title = self.hidden_title;
       let accept_first_mouse = self.accept_first_mouse;
       let tabbing_identifier = opt_str_lit(self.tabbing_identifier.as_ref());
@@ -3120,6 +3142,7 @@ mod build {
         window_classname,
         theme,
         title_bar_style,
+        traffic_light_position,
         hidden_title,
         accept_first_mouse,
         tabbing_identifier,
@@ -3276,6 +3299,7 @@ mod build {
       let before_build_command = quote!(None);
       let before_bundle_command = quote!(None);
       let features = quote!(None);
+      let remove_unused_commands = quote!(false);
 
       literal_struct!(
         tokens,
@@ -3286,7 +3310,8 @@ mod build {
         before_dev_command,
         before_build_command,
         before_bundle_command,
-        features
+        features,
+        remove_unused_commands
       );
     }
   }
@@ -3610,6 +3635,7 @@ mod test {
       before_build_command: None,
       before_bundle_command: None,
       features: None,
+      remove_unused_commands: false,
     };
 
     // create a bundle config

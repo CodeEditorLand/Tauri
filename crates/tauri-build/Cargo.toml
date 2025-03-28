@@ -1,6 +1,6 @@
 [package]
 name = "tauri-build"
-version = "2.0.6"
+version = "2.1.0"
 description = "build time code to pair with https://crates.io/crates/tauri"
 exclude = ["CHANGELOG.md", "/target"]
 readme = "README.md"
@@ -33,11 +33,17 @@ glob = "0.3"
 heck = "0.5"
 json-patch = "3"
 quote = { version = "1", optional = true }
-tauri-codegen = { version = "2.0.5", path = "../tauri-codegen", optional = true }
-tauri-utils = { version = "2.2.0", path = "../tauri-utils", features = [
+tauri-codegen = { version = "2.1.0", path = "../tauri-codegen", optional = true }
+tauri-utils = { version = "2.3.0", path = "../tauri-utils", features = [
   "build",
   "resources",
 ] }
+cargo_toml = "0.22"
+serde = "1"
+serde_json = "1"
+heck = "0.5"
+json-patch = "3"
+walkdir = "2"
 tauri-winres = "0.3"
 toml = "0.8"
 walkdir = "2"

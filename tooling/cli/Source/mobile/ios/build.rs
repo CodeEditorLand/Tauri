@@ -21,24 +21,11 @@ use cargo_mobile2::{
 use clap::{ArgAction, Parser, ValueEnum};
 
 use super::{
-	MobileTarget,
-	OptionsHandle,
-	detect_target_ok,
-	ensure_init,
-	env,
-	get_app,
-	get_config,
-	inject_resources,
-	load_pbxproj,
-	log_finished,
-	merge_plist,
-	open_and_wait,
-	project_config,
-	synchronize_project_config,
+	MobileTarget, OptionsHandle, detect_target_ok, ensure_init, env, get_app, get_config, inject_resources,
+	load_pbxproj, log_finished, merge_plist, open_and_wait, project_config, synchronize_project_config,
 };
 use crate::{
-	ConfigValue,
-	Result,
+	ConfigValue, Result,
 	build::Options as BuildOptions,
 	helpers::{
 		app_paths::tauri_dir,
@@ -60,7 +47,7 @@ use crate::{
 pub struct Options {
 	/// Builds with the debug flag
 	#[clap(short, long)]
-	pub debug:bool,
+	pub debug: bool,
 	/// Which targets to build.
 	#[clap(
     short,
@@ -70,28 +57,28 @@ pub struct Options {
     default_value = Target::DEFAULT_KEY,
     value_parser(clap::builder::PossibleValuesParser::new(Target::name_list()))
   )]
-	pub targets:Vec<String>,
+	pub targets: Vec<String>,
 	/// List of cargo features to activate
 	#[clap(short, long, action = ArgAction::Append, num_args(0..))]
-	pub features:Option<Vec<String>>,
+	pub features: Option<Vec<String>>,
 	/// JSON string or path to JSON file to merge with tauri.conf.json
 	#[clap(short, long)]
-	pub config:Option<ConfigValue>,
+	pub config: Option<ConfigValue>,
 	/// Build number to append to the app version.
 	#[clap(long)]
-	pub build_number:Option<u32>,
+	pub build_number: Option<u32>,
 	/// Open Xcode
 	#[clap(short, long)]
-	pub open:bool,
+	pub open: bool,
 	/// Skip prompting for values
 	#[clap(long, env = "CI")]
-	pub ci:bool,
+	pub ci: bool,
 	/// Describes how Xcode should export the archive.
 	///
 	/// Use this to create a package ready for the App Store (app-store-connect
 	/// option) or TestFlight (release-testing option).
 	#[clap(long, value_enum)]
-	pub export_method:Option<ExportMethod>,
+	pub export_method: Option<ExportMethod>,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
@@ -102,7 +89,7 @@ pub enum ExportMethod {
 }
 
 impl std::fmt::Display for ExportMethod {
-	fn fmt(&self, f:&mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			Self::AppStoreConnect => write!(f, "app-store-connect"),
 			Self::ReleaseTesting => write!(f, "release-testing"),
@@ -114,7 +101,7 @@ impl std::fmt::Display for ExportMethod {
 impl std::str::FromStr for ExportMethod {
 	type Err = &'static str;
 
-	fn from_str(s:&str) -> Result<Self, Self::Err> {
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"app-store-connect" => Ok(Self::AppStoreConnect),
 			"release-testing" => Ok(Self::ReleaseTesting),
@@ -125,25 +112,25 @@ impl std::str::FromStr for ExportMethod {
 }
 
 impl From<Options> for BuildOptions {
-	fn from(options:Options) -> Self {
+	fn from(options: Options) -> Self {
 		Self {
-			runner:None,
-			debug:options.debug,
-			target:None,
-			features:options.features,
-			bundles:None,
-			no_bundle:false,
-			config:options.config,
-			args:Vec::new(),
-			ci:options.ci,
+			runner: None,
+			debug: options.debug,
+			target: None,
+			features: options.features,
+			bundles: None,
+			no_bundle: false,
+			config: options.config,
+			args: Vec::new(),
+			ci: options.ci,
 		}
 	}
 }
 
-pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
+pub fn command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 	crate::helpers::app_paths::resolve();
 
-	let mut build_options:BuildOptions = options.clone().into();
+	let mut build_options: BuildOptions = options.clone().into();
 
 	build_options.target = Some(
 		Target::all()
@@ -153,10 +140,7 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 			.into(),
 	);
 
-	let tauri_config = get_tauri_config(
-		tauri_utils::platform::Target::Ios,
-		options.config.as_ref().map(|c| &c.0),
-	)?;
+	let tauri_config = get_tauri_config(tauri_utils::platform::Target::Ios, options.config.as_ref().map(|c| &c.0))?;
 
 	let (interface, mut config) = {
 		let tauri_config_guard = tauri_config.lock().unwrap();
@@ -169,8 +153,7 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 		let app = get_app(MobileTarget::Ios, tauri_config_, &interface);
 
-		let (config, _metadata) =
-			get_config(&app, tauri_config_, build_options.features.as_ref(), &Default::default());
+		let (config, _metadata) = get_config(&app, tauri_config_, build_options.features.as_ref(), &Default::default());
 		(interface, config)
 	};
 
@@ -243,8 +226,7 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 	let open = options.open;
 
-	let _handle =
-		run_build(interface, options, build_options, tauri_config, &config, &mut env, noise_level)?;
+	let _handle = run_build(interface, options, build_options, tauri_config, &config, &mut env, noise_level)?;
 
 	if open {
 		open_and_wait(&config, &env);
@@ -255,13 +237,13 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 #[allow(clippy::too_many_arguments)]
 fn run_build(
-	interface:AppInterface,
-	options:Options,
-	mut build_options:BuildOptions,
-	tauri_config:ConfigHandle,
-	config:&AppleConfig,
-	env:&mut Env,
-	noise_level:NoiseLevel,
+	interface: AppInterface,
+	options: Options,
+	mut build_options: BuildOptions,
+	tauri_config: ConfigHandle,
+	config: &AppleConfig,
+	env: &mut Env,
+	noise_level: NoiseLevel,
 ) -> Result<OptionsHandle> {
 	let profile = if options.debug { Profile::Debug } else { Profile::Release };
 
@@ -270,8 +252,8 @@ fn run_build(
 	let app_settings = interface.app_settings();
 
 	let bin_path = app_settings.app_binary_path(&InterfaceOptions {
-		debug:build_options.debug,
-		target:build_options.target.clone(),
+		debug: build_options.debug,
+		target: build_options.target.clone(),
 		..Default::default()
 	})?;
 
@@ -280,17 +262,16 @@ fn run_build(
 	let _lock = flock::open_rw(out_dir.join("lock").with_extension("ios"), "iOS")?;
 
 	let cli_options = CliOptions {
-		dev:false,
-		features:build_options.features.clone(),
-		args:build_options.args.clone(),
+		dev: false,
+		features: build_options.features.clone(),
+		args: build_options.args.clone(),
 		noise_level,
-		vars:Default::default(),
-		config:build_options.config.clone(),
-		target_device:None,
+		vars: Default::default(),
+		config: build_options.config.clone(),
+		target_device: None,
 	};
 
-	let handle =
-		write_options(&tauri_config.lock().unwrap().as_ref().unwrap().identifier, cli_options)?;
+	let handle = write_options(&tauri_config.lock().unwrap().as_ref().unwrap().identifier, cli_options)?;
 
 	let mut out_files = Vec::new();
 
@@ -298,7 +279,7 @@ fn run_build(
 		options.targets.iter(),
 		&detect_target_ok,
 		env,
-		|target:&Target| -> Result<()> {
+		|target: &Target| -> Result<()> {
 			let mut app_version = config.bundle_version().clone();
 
 			if let Some(build_number) = options.build_number {
@@ -365,7 +346,7 @@ fn run_build(
 			Ok(())
 		},
 	)
-	.map_err(|e:TargetInvalid| anyhow::anyhow!(e.to_string()))??;
+	.map_err(|e: TargetInvalid| anyhow::anyhow!(e.to_string()))??;
 
 	log_finished(out_files, "iOS Bundle");
 

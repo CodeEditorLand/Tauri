@@ -35,22 +35,28 @@ use crate::{Manager, Runtime, image::Image, menu::*};
 /// 	Ok(())
 /// });
 /// ```
-pub struct SubmenuBuilder<'m, R:Runtime, M:Manager<R>> {
-	id:Option<MenuId>,
-	manager:&'m M,
-	text:String,
-	enabled:bool,
-	items:Vec<crate::Result<MenuItemKind<R>>>,
+pub struct SubmenuBuilder<'m, R: Runtime, M: Manager<R>> {
+	id: Option<MenuId>,
+	manager: &'m M,
+	text: String,
+	enabled: bool,
+	items: Vec<crate::Result<MenuItemKind<R>>>,
 }
 
-impl<'m, R:Runtime, M:Manager<R>> SubmenuBuilder<'m, R, M> {
+impl<'m, R: Runtime, M: Manager<R>> SubmenuBuilder<'m, R, M> {
 	/// Create a new submenu builder.
 	///
 	/// - `text` could optionally contain an `&` before a character to assign
 	///   this character as the mnemonic for this menu item. To display a `&`
 	///   without assigning a mnemenonic, use `&&`.
-	pub fn new<S:AsRef<str>>(manager:&'m M, text:S) -> Self {
-		Self { id:None, items:Vec::new(), text:text.as_ref().to_string(), enabled:true, manager }
+	pub fn new<S: AsRef<str>>(manager: &'m M, text: S) -> Self {
+		Self {
+			id: None,
+			items: Vec::new(),
+			text: text.as_ref().to_string(),
+			enabled: true,
+			manager,
+		}
 	}
 
 	/// Create a new submenu builder with the specified id.
@@ -58,39 +64,39 @@ impl<'m, R:Runtime, M:Manager<R>> SubmenuBuilder<'m, R, M> {
 	/// - `text` could optionally contain an `&` before a character to assign
 	///   this character as the mnemonic for this menu item. To display a `&`
 	///   without assigning a mnemenonic, use `&&`.
-	pub fn with_id<I:Into<MenuId>, S:AsRef<str>>(manager:&'m M, id:I, text:S) -> Self {
+	pub fn with_id<I: Into<MenuId>, S: AsRef<str>>(manager: &'m M, id: I, text: S) -> Self {
 		Self {
-			id:Some(id.into()),
-			text:text.as_ref().to_string(),
-			enabled:true,
-			items:Vec::new(),
+			id: Some(id.into()),
+			text: text.as_ref().to_string(),
+			enabled: true,
+			items: Vec::new(),
 			manager,
 		}
 	}
 
 	/// Set the id for this submenu.
-	pub fn id<I:Into<MenuId>>(mut self, id:I) -> Self {
+	pub fn id<I: Into<MenuId>>(mut self, id: I) -> Self {
 		self.id.replace(id.into());
 
 		self
 	}
 
 	/// Set the enabled state for the submenu.
-	pub fn enabled(mut self, enabled:bool) -> Self {
+	pub fn enabled(mut self, enabled: bool) -> Self {
 		self.enabled = enabled;
 
 		self
 	}
 
 	/// Add this item to the submenu.
-	pub fn item(mut self, item:&dyn IsMenuItem<R>) -> Self {
+	pub fn item(mut self, item: &dyn IsMenuItem<R>) -> Self {
 		self.items.push(Ok(item.kind()));
 
 		self
 	}
 
 	/// Add these items to the submenu.
-	pub fn items(mut self, items:&[&dyn IsMenuItem<R>]) -> Self {
+	pub fn items(mut self, items: &[&dyn IsMenuItem<R>]) -> Self {
 		for item in items {
 			self = self.item(*item);
 		}
@@ -99,7 +105,7 @@ impl<'m, R:Runtime, M:Manager<R>> SubmenuBuilder<'m, R, M> {
 	}
 
 	/// Add a [MenuItem] to the submenu.
-	pub fn text<I:Into<MenuId>, S:AsRef<str>>(mut self, id:I, text:S) -> Self {
+	pub fn text<I: Into<MenuId>, S: AsRef<str>>(mut self, id: I, text: S) -> Self {
 		self.items
 			.push(MenuItem::with_id(self.manager, id, text, true, None::<&str>).map(|i| i.kind()));
 
@@ -107,21 +113,17 @@ impl<'m, R:Runtime, M:Manager<R>> SubmenuBuilder<'m, R, M> {
 	}
 
 	/// Add a [CheckMenuItem] to the submenu.
-	pub fn check<I:Into<MenuId>, S:AsRef<str>>(mut self, id:I, text:S) -> Self {
-		self.items.push(
-			CheckMenuItem::with_id(self.manager, id, text, true, true, None::<&str>)
-				.map(|i| i.kind()),
-		);
+	pub fn check<I: Into<MenuId>, S: AsRef<str>>(mut self, id: I, text: S) -> Self {
+		self.items
+			.push(CheckMenuItem::with_id(self.manager, id, text, true, true, None::<&str>).map(|i| i.kind()));
 
 		self
 	}
 
 	/// Add an [IconMenuItem] to the submenu.
-	pub fn icon<I:Into<MenuId>, S:AsRef<str>>(mut self, id:I, text:S, icon:Image<'_>) -> Self {
-		self.items.push(
-			IconMenuItem::with_id(self.manager, id, text, true, Some(icon), None::<&str>)
-				.map(|i| i.kind()),
-		);
+	pub fn icon<I: Into<MenuId>, S: AsRef<str>>(mut self, id: I, text: S, icon: Image<'_>) -> Self {
+		self.items
+			.push(IconMenuItem::with_id(self.manager, id, text, true, Some(icon), None::<&str>).map(|i| i.kind()));
 
 		self
 	}
@@ -131,22 +133,10 @@ impl<'m, R:Runtime, M:Manager<R>> SubmenuBuilder<'m, R, M> {
 	/// ## Platform-specific:
 	///
 	/// - **Windows / Linux**: Unsupported.
-	pub fn native_icon<I:Into<MenuId>, S:AsRef<str>>(
-		mut self,
-		id:I,
-		text:S,
-		icon:NativeIcon,
-	) -> Self {
+	pub fn native_icon<I: Into<MenuId>, S: AsRef<str>>(mut self, id: I, text: S, icon: NativeIcon) -> Self {
 		self.items.push(
-			IconMenuItem::with_id_and_native_icon(
-				self.manager,
-				id,
-				text,
-				true,
-				Some(icon),
-				None::<&str>,
-			)
-			.map(|i| i.kind()),
+			IconMenuItem::with_id_and_native_icon(self.manager, id, text, true, Some(icon), None::<&str>)
+				.map(|i| i.kind()),
 		);
 
 		self
@@ -305,7 +295,7 @@ impl<'m, R:Runtime, M:Manager<R>> SubmenuBuilder<'m, R, M> {
 	}
 
 	/// Add About app menu item to the submenu.
-	pub fn about(mut self, metadata:Option<AboutMetadata<'_>>) -> Self {
+	pub fn about(mut self, metadata: Option<AboutMetadata<'_>>) -> Self {
 		self.items
 			.push(PredefinedMenuItem::about(self.manager, None, metadata).map(|i| i.kind()));
 

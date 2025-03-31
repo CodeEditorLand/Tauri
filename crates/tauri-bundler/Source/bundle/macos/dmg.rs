@@ -14,26 +14,24 @@ use anyhow::Context;
 
 use super::{app, icon::create_icns_file};
 use crate::{
-	PackageType,
-	Settings,
+	PackageType, Settings,
 	bundle::{Bundle, common::CommandExt},
 };
 
 pub struct Bundled {
-	pub dmg:Vec<PathBuf>,
-	pub app:Vec<PathBuf>,
+	pub dmg: Vec<PathBuf>,
+	pub app: Vec<PathBuf>,
 }
 
 /// Bundles the project.
 /// Returns a vector of PathBuf that shows where the DMG was created.
-pub fn bundle_project(settings:&Settings, bundles:&[Bundle]) -> crate::Result<Bundled> {
+pub fn bundle_project(settings: &Settings, bundles: &[Bundle]) -> crate::Result<Bundled> {
 	// generate the .app bundle if needed
-	let app_bundle_paths =
-		if !bundles.iter().any(|bundle| bundle.package_type == PackageType::MacOsBundle) {
-			app::bundle_project(settings)?
-		} else {
-			Vec::new()
-		};
+	let app_bundle_paths = if !bundles.iter().any(|bundle| bundle.package_type == PackageType::MacOsBundle) {
+		app::bundle_project(settings)?
+	} else {
+		Vec::new()
+	};
 
 	// get the target path
 	let output_path = settings.project_out_directory().join("bundle/dmg");
@@ -61,13 +59,11 @@ pub fn bundle_project(settings:&Settings, bundles:&[Bundle]) -> crate::Result<Bu
 	let support_directory_path = output_path.join("support");
 
 	if output_path.exists() {
-		fs::remove_dir_all(&output_path)
-			.with_context(|| format!("Failed to remove old {}", dmg_name))?;
+		fs::remove_dir_all(&output_path).with_context(|| format!("Failed to remove old {}", dmg_name))?;
 	}
 
-	fs::create_dir_all(&support_directory_path).with_context(|| {
-		format!("Failed to create output directory at {:?}", support_directory_path)
-	})?;
+	fs::create_dir_all(&support_directory_path)
+		.with_context(|| format!("Failed to create output directory at {:?}", support_directory_path))?;
 
 	// create paths for script
 	let bundle_script_path = output_path.join("bundle_dmg.sh");
@@ -205,10 +201,10 @@ pub fn bundle_project(settings:&Settings, bundles:&[Bundle]) -> crate::Result<Bu
 	if let Some(keychain) = super::sign::keychain(settings.macos().signing_identity.as_deref())? {
 		super::sign::sign(
 			&keychain,
-			vec![super::sign::SignTarget { path:dmg_path.clone(), is_an_executable:false }],
+			vec![super::sign::SignTarget { path: dmg_path.clone(), is_an_executable: false }],
 			settings,
 		)?;
 	}
 
-	Ok(Bundled { dmg:vec![dmg_path], app:app_bundle_paths })
+	Ok(Bundled { dmg: vec![dmg_path], app: app_bundle_paths })
 }

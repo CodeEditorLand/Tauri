@@ -31,19 +31,17 @@ use crate::{
 
 /// Bundles the project.
 /// Returns a vector of PathBuf that shows where the .app was created.
-pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
+pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
 	log::warn!("iOS bundle support is still experimental.");
 
 	let app_product_name = format!("{}.app", settings.product_name());
 
-	let app_bundle_path =
-		settings.project_out_directory().join("bundle/ios").join(&app_product_name);
+	let app_bundle_path = settings.project_out_directory().join("bundle/ios").join(&app_product_name);
 
 	log::info!(action = "Bundling"; "{} ({})", app_product_name, app_bundle_path.display());
 
 	if app_bundle_path.exists() {
-		fs::remove_dir_all(&app_bundle_path)
-			.with_context(|| format!("Failed to remove old {}", app_product_name))?;
+		fs::remove_dir_all(&app_bundle_path).with_context(|| format!("Failed to remove old {}", app_product_name))?;
 	}
 	fs::create_dir_all(&app_bundle_path)
 		.with_context(|| format!("Failed to create bundle directory at {:?}", app_bundle_path))?;
@@ -53,14 +51,12 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 
 		let dest = app_bundle_path.join(tauri_utils::resources::resource_relpath(&src));
 
-		fs_utils::copy_file(&src, &dest)
-			.with_context(|| format!("Failed to copy resource file {:?}", src))?;
+		fs_utils::copy_file(&src, &dest).with_context(|| format!("Failed to copy resource file {:?}", src))?;
 	}
 
-	let icon_filenames = generate_icon_files(&app_bundle_path, settings)
-		.with_context(|| "Failed to create app icons")?;
-	generate_info_plist(&app_bundle_path, settings, &icon_filenames)
-		.with_context(|| "Failed to create Info.plist")?;
+	let icon_filenames =
+		generate_icon_files(&app_bundle_path, settings).with_context(|| "Failed to create app icons")?;
+	generate_info_plist(&app_bundle_path, settings, &icon_filenames).with_context(|| "Failed to create Info.plist")?;
 
 	for bin in settings.binaries() {
 		let bin_path = settings.binary_path(bin);
@@ -73,12 +69,11 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 }
 
 /// Generate the icon files and store them under the `bundle_dir`.
-fn generate_icon_files(bundle_dir:&Path, settings:&Settings) -> crate::Result<Vec<String>> {
+fn generate_icon_files(bundle_dir: &Path, settings: &Settings) -> crate::Result<Vec<String>> {
 	let mut filenames = Vec::new();
 	{
-		let mut get_dest_path = |width:u32, height:u32, is_retina:bool| {
-			let filename =
-				format!("icon_{}x{}{}.png", width, height, if is_retina { "@2x" } else { "" });
+		let mut get_dest_path = |width: u32, height: u32, is_retina: bool| {
+			let filename = format!("icon_{}x{}{}.png", width, height, if is_retina { "@2x" } else { "" });
 			let path = bundle_dir.join(&filename);
 			filenames.push(filename);
 			path
@@ -135,10 +130,7 @@ fn generate_icon_files(bundle_dir:&Path, settings:&Settings) -> crate::Result<Ve
 				if !sizes.contains(&(width, height, is_retina)) {
 					sizes.insert((width, height, is_retina));
 					let dest_path = get_dest_path(width, height, is_retina);
-					icon.write_to(
-						&mut fs_utils::create_file(&dest_path)?,
-						image::ImageFormat::Png,
-					)?;
+					icon.write_to(&mut fs_utils::create_file(&dest_path)?, image::ImageFormat::Png)?;
 				}
 			}
 		}
@@ -147,20 +139,16 @@ fn generate_icon_files(bundle_dir:&Path, settings:&Settings) -> crate::Result<Ve
 }
 
 /// Generates the Info.plist file
-fn generate_info_plist(
-	bundle_dir:&Path,
-	settings:&Settings,
-	icon_filenames:&[String],
-) -> crate::Result<()> {
+fn generate_info_plist(bundle_dir: &Path, settings: &Settings, icon_filenames: &[String]) -> crate::Result<()> {
 	let file = &mut fs_utils::create_file(&bundle_dir.join("Info.plist"))?;
 	writeln!(
-    file,
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+		file,
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
           <!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \
           \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n\
           <plist version=\"1.0\">\n\
           <dict>"
-  )?;
+	)?;
 
 	writeln!(
 		file,

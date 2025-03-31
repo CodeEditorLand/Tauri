@@ -23,13 +23,8 @@ use crate::{
 		windows::{
 			sign::{sign_command, try_sign},
 			util::{
-				HashAlgorithm,
-				NSIS_OUTPUT_FOLDER_NAME,
-				NSIS_UPDATER_OUTPUT_FOLDER_NAME,
-				download_and_verify,
-				download_webview2_bootstrapper,
-				download_webview2_offline_installer,
-				verify_file_hash,
+				HashAlgorithm, NSIS_OUTPUT_FOLDER_NAME, NSIS_UPDATER_OUTPUT_FOLDER_NAME, download_and_verify,
+				download_webview2_bootstrapper, download_webview2_offline_installer, verify_file_hash,
 			},
 		},
 	},
@@ -37,16 +32,15 @@ use crate::{
 
 // URLS for the NSIS toolchain.
 #[cfg(target_os = "windows")]
-const NSIS_URL:&str =
-	"https://github.com/tauri-apps/binary-releases/releases/download/nsis-3/nsis-3.zip";
+const NSIS_URL: &str = "https://github.com/tauri-apps/binary-releases/releases/download/nsis-3/nsis-3.zip";
 #[cfg(target_os = "windows")]
-const NSIS_SHA1:&str = "057e83c7d82462ec394af76c87d06733605543d4";
+const NSIS_SHA1: &str = "057e83c7d82462ec394af76c87d06733605543d4";
 const NSIS_TAURI_UTILS_URL: &str =
-  "https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.4.1/nsis_tauri_utils.dll";
-const NSIS_TAURI_UTILS_SHA1:&str = "F99A50209A345185A84D34D0E5F66D04C75FF52F";
+	"https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.4.1/nsis_tauri_utils.dll";
+const NSIS_TAURI_UTILS_SHA1: &str = "F99A50209A345185A84D34D0E5F66D04C75FF52F";
 
 #[cfg(target_os = "windows")]
-const NSIS_REQUIRED_FILES:&[&str] = &[
+const NSIS_REQUIRED_FILES: &[&str] = &[
 	"makensis.exe",
 	"Bin/makensis.exe",
 	"Stubs/lzma-x86-unicode",
@@ -59,9 +53,9 @@ const NSIS_REQUIRED_FILES:&[&str] = &[
 	"Include/WinMessages.nsh",
 ];
 #[cfg(not(target_os = "windows"))]
-const NSIS_REQUIRED_FILES:&[&str] = &["Plugins/x86-unicode/nsis_tauri_utils.dll"];
+const NSIS_REQUIRED_FILES: &[&str] = &["Plugins/x86-unicode/nsis_tauri_utils.dll"];
 
-const NSIS_REQUIRED_FILES_HASH:&[(&str, &str, &str, HashAlgorithm)] = &[(
+const NSIS_REQUIRED_FILES_HASH: &[(&str, &str, &str, HashAlgorithm)] = &[(
 	"Plugins/x86-unicode/nsis_tauri_utils.dll",
 	NSIS_TAURI_UTILS_URL,
 	NSIS_TAURI_UTILS_SHA1,
@@ -70,7 +64,7 @@ const NSIS_REQUIRED_FILES_HASH:&[(&str, &str, &str, HashAlgorithm)] = &[(
 
 /// Runs all of the commands to build the NSIS installer.
 /// Returns a vector of PathBuf that shows where the NSIS installer was created.
-pub fn bundle_project(settings:&Settings, updater:bool) -> crate::Result<Vec<PathBuf>> {
+pub fn bundle_project(settings: &Settings, updater: bool) -> crate::Result<Vec<PathBuf>> {
 	let tauri_tools_path = settings
 		.local_tools_directory()
 		.map(|d| d.join(".tauri"))
@@ -109,7 +103,7 @@ pub fn bundle_project(settings:&Settings, updater:bool) -> crate::Result<Vec<Pat
 }
 
 // Gets NSIS and verifies the download via Sha1
-fn get_and_extract_nsis(nsis_toolset_path:&Path, _tauri_tools_path:&Path) -> crate::Result<()> {
+fn get_and_extract_nsis(nsis_toolset_path: &Path, _tauri_tools_path: &Path) -> crate::Result<()> {
 	log::info!("Verifying NSIS package");
 
 	#[cfg(target_os = "windows")]
@@ -125,8 +119,7 @@ fn get_and_extract_nsis(nsis_toolset_path:&Path, _tauri_tools_path:&Path) -> cra
 
 	let nsis_plugins = nsis_toolset_path.join("Plugins");
 
-	let data =
-		download_and_verify(NSIS_TAURI_UTILS_URL, NSIS_TAURI_UTILS_SHA1, HashAlgorithm::Sha1)?;
+	let data = download_and_verify(NSIS_TAURI_UTILS_URL, NSIS_TAURI_UTILS_SHA1, HashAlgorithm::Sha1)?;
 
 	let target_folder = nsis_plugins.join("x86-unicode");
 
@@ -137,7 +130,7 @@ fn get_and_extract_nsis(nsis_toolset_path:&Path, _tauri_tools_path:&Path) -> cra
 	Ok(())
 }
 
-fn add_build_number_if_needed(version_str:&str) -> anyhow::Result<String> {
+fn add_build_number_if_needed(version_str: &str) -> anyhow::Result<String> {
 	let version = semver::Version::parse(version_str).context("invalid app version")?;
 
 	if !version.build.is_empty() {
@@ -156,10 +149,10 @@ fn add_build_number_if_needed(version_str:&str) -> anyhow::Result<String> {
 	Ok(format!("{}.{}.{}.0", version.major, version.minor, version.patch,))
 }
 fn build_nsis_app_installer(
-	settings:&Settings,
-	_nsis_toolset_path:&Path,
-	tauri_tools_path:&Path,
-	updater:bool,
+	settings: &Settings,
+	_nsis_toolset_path: &Path,
+	tauri_tools_path: &Path,
+	updater: bool,
 ) -> crate::Result<Vec<PathBuf>> {
 	let arch = match settings.binary_arch() {
 		"x86_64" => "x64",
@@ -241,8 +234,7 @@ fn build_nsis_app_installer(
 
 	let custom_template_path = nsis.as_ref().and_then(|n| n.template.clone());
 
-	let install_mode =
-		nsis.as_ref().map(|n| n.install_mode).unwrap_or(NSISInstallerMode::CurrentUser);
+	let install_mode = nsis.as_ref().map(|n| n.install_mode).unwrap_or(NSISInstallerMode::CurrentUser);
 
 	if let Some(nsis) = nsis {
 		if let Some(installer_icon) = &nsis.installer_icon {
@@ -336,7 +328,9 @@ fn build_nsis_app_installer(
 
 				language_files_paths.push(path);
 			} else {
-				log::warn!("Custom tauri messages for {lang} are not translated.\nIf it is a valid language listed on <https://github.com/kichik/nsis/tree/9465c08046f00ccb6eda985abbdbf52c275c6c4d/Contrib/Language%20files>, please open a Tauri feature request\n or you can provide a custom language file for it in `tauri.conf.json > bundle > windows > nsis > custom_language_files`");
+				log::warn!(
+					"Custom tauri messages for {lang} are not translated.\nIf it is a valid language listed on <https://github.com/kichik/nsis/tree/9465c08046f00ccb6eda985abbdbf52c275c6c4d/Contrib/Language%20files>, please open a Tauri feature request\n or you can provide a custom language file for it in `tauri.conf.json > bundle > windows > nsis > custom_language_files`"
+				);
 			}
 		}
 	}
@@ -357,11 +351,9 @@ fn build_nsis_app_installer(
 
 	let resources = generate_resource_data(settings)?;
 
-	let resources_dirs =
-		std::collections::HashSet::<PathBuf>::from_iter(resources.values().map(|r| r.0.to_owned()));
+	let resources_dirs = std::collections::HashSet::<PathBuf>::from_iter(resources.values().map(|r| r.0.to_owned()));
 
-	let mut resources_ancestors =
-		resources_dirs.iter().flat_map(|p| p.ancestors()).collect::<Vec<_>>();
+	let mut resources_ancestors = resources_dirs.iter().flat_map(|p| p.ancestors()).collect::<Vec<_>>();
 
 	resources_ancestors.sort_unstable();
 
@@ -373,7 +365,7 @@ fn build_nsis_app_installer(
 
 	// We need to convert / to \ for nsis to move the files into the correct dirs
 	#[cfg(not(target_os = "windows"))]
-	let resources:ResourcesMap = resources
+	let resources: ResourcesMap = resources
 		.into_iter()
 		.map(|(r, p)| {
 			(
@@ -386,12 +378,12 @@ fn build_nsis_app_installer(
 		})
 		.collect();
 	#[cfg(not(target_os = "windows"))]
-	let resources_ancestors:Vec<PathBuf> = resources_ancestors
+	let resources_ancestors: Vec<PathBuf> = resources_ancestors
 		.into_iter()
 		.map(|p| p.display().to_string().replace('/', "\\").into())
 		.collect();
 	#[cfg(not(target_os = "windows"))]
-	let resources_dirs:Vec<PathBuf> = resources_dirs
+	let resources_dirs: Vec<PathBuf> = resources_dirs
 		.into_iter()
 		.map(|p| p.display().to_string().replace('/', "\\").into())
 		.collect();
@@ -431,7 +423,7 @@ fn build_nsis_app_installer(
 	};
 
 	let webview2_install_mode = if updater {
-		WebviewInstallMode::DownloadBootstrapper { silent:silent_webview2_install }
+		WebviewInstallMode::DownloadBootstrapper { silent: silent_webview2_install }
 	} else {
 		settings.windows().webview_install_mode.clone()
 	};
@@ -457,8 +449,7 @@ fn build_nsis_app_installer(
 			data.insert("webview2_bootstrapper_path", to_json(webview2_bootstrapper_path));
 		},
 		WebviewInstallMode::OfflineInstaller { silent: _ } => {
-			let webview2_installer_path =
-				download_webview2_offline_installer(&tauri_tools_path.join(arch), arch)?;
+			let webview2_installer_path = download_webview2_offline_installer(&tauri_tools_path.join(arch), arch)?;
 
 			data.insert("webview2_installer_path", to_json(webview2_installer_path));
 		},
@@ -512,8 +503,7 @@ fn build_nsis_app_installer(
 
 	write_utf8_with_bom(&installer_nsi_path, handlebars.render("installer.nsi", &data)?)?;
 
-	let package_base_name =
-		format!("{}_{}_{}-setup", settings.product_name(), settings.version_string(), arch,);
+	let package_base_name = format!("{}_{}_{}-setup", settings.product_name(), settings.version_string(), arch,);
 
 	let nsis_output_path = output_path.join(out_file);
 
@@ -564,11 +554,11 @@ fn build_nsis_app_installer(
 }
 
 fn handlebars_or(
-	h:&handlebars::Helper<'_>,
-	_:&Handlebars<'_>,
-	_:&handlebars::Context,
-	_:&mut handlebars::RenderContext<'_, '_>,
-	out:&mut dyn handlebars::Output,
+	h: &handlebars::Helper<'_>,
+	_: &Handlebars<'_>,
+	_: &handlebars::Context,
+	_: &mut handlebars::RenderContext<'_, '_>,
+	out: &mut dyn handlebars::Output,
 ) -> handlebars::HelperResult {
 	let param1 = h.param(0).unwrap().render();
 
@@ -580,11 +570,11 @@ fn handlebars_or(
 }
 
 fn association_description(
-	h:&handlebars::Helper<'_>,
-	_:&Handlebars<'_>,
-	_:&handlebars::Context,
-	_:&mut handlebars::RenderContext<'_, '_>,
-	out:&mut dyn handlebars::Output,
+	h: &handlebars::Helper<'_>,
+	_: &Handlebars<'_>,
+	_: &handlebars::Context,
+	_: &mut handlebars::RenderContext<'_, '_>,
+	out: &mut dyn handlebars::Output,
 ) -> handlebars::HelperResult {
 	let description = h.param(0).unwrap().render();
 
@@ -601,7 +591,7 @@ fn association_description(
 
 /// BTreeMap<OriginalPath, (ParentOfTargetPath, TargetPath)>
 type ResourcesMap = BTreeMap<PathBuf, (PathBuf, PathBuf)>;
-fn generate_resource_data(settings:&Settings) -> crate::Result<ResourcesMap> {
+fn generate_resource_data(settings: &Settings) -> crate::Result<ResourcesMap> {
 	let mut resources = ResourcesMap::new();
 
 	let cwd = std::env::current_dir()?;
@@ -641,7 +631,7 @@ fn generate_resource_data(settings:&Settings) -> crate::Result<ResourcesMap> {
 
 /// BTreeMap<OriginalPath, TargetFileName>
 type BinariesMap = BTreeMap<PathBuf, String>;
-fn generate_binaries_data(settings:&Settings) -> crate::Result<BinariesMap> {
+fn generate_binaries_data(settings: &Settings) -> crate::Result<BinariesMap> {
 	let mut binaries = BinariesMap::new();
 
 	let cwd = std::env::current_dir()?;
@@ -678,11 +668,7 @@ fn generate_binaries_data(settings:&Settings) -> crate::Result<BinariesMap> {
 	Ok(binaries)
 }
 
-fn generate_estimated_size(
-	main:&PathBuf,
-	binaries:&BinariesMap,
-	resources:&ResourcesMap,
-) -> crate::Result<u64> {
+fn generate_estimated_size(main: &PathBuf, binaries: &BinariesMap, resources: &ResourcesMap) -> crate::Result<u64> {
 	let mut size = 0;
 
 	for k in std::iter::once(main).chain(binaries.keys()).chain(resources.keys()) {
@@ -694,10 +680,10 @@ fn generate_estimated_size(
 	Ok(size / 1024)
 }
 
-fn get_lang_data(lang:&str) -> Option<(String, &[u8])> {
+fn get_lang_data(lang: &str) -> Option<(String, &[u8])> {
 	let path = format!("{lang}.nsh");
 
-	let content:&[u8] = match lang.to_lowercase().as_str() {
+	let content: &[u8] = match lang.to_lowercase().as_str() {
 		"arabic" => include_bytes!("./templates/nsis-languages/Arabic.nsh"),
 		"bulgarian" => include_bytes!("./templates/nsis-languages/Bulgarian.nsh"),
 		"dutch" => include_bytes!("./templates/nsis-languages/Dutch.nsh"),
@@ -723,7 +709,7 @@ fn get_lang_data(lang:&str) -> Option<(String, &[u8])> {
 	Some((path, content))
 }
 
-fn write_utf8_with_bom<P:AsRef<Path>, C:AsRef<[u8]>>(path:P, content:C) -> crate::Result<()> {
+fn write_utf8_with_bom<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, content: C) -> crate::Result<()> {
 	use std::{
 		fs::File,
 		io::{BufWriter, Write},

@@ -12,12 +12,7 @@ use std::{
 
 use cargo_mobile2::{
 	apple::{
-		config::{
-			Config as AppleConfig,
-			Metadata as AppleMetadata,
-			Platform as ApplePlatform,
-			Raw as RawAppleConfig,
-		},
+		config::{Config as AppleConfig, Metadata as AppleMetadata, Platform as ApplePlatform, Raw as RawAppleConfig},
 		device::{self, Device},
 		target::Target,
 		teams::find_development_teams,
@@ -33,16 +28,8 @@ use sublime_fuzzy::best_match;
 use tauri_utils::resources::ResourcePaths;
 
 use super::{
-	CliOptions,
-	MIN_DEVICE_MATCH_SCORE,
-	OptionsHandle,
-	Target as MobileTarget,
-	ensure_init,
-	env,
-	get_app,
-	init::command as init_command,
-	log_finished,
-	read_options,
+	CliOptions, MIN_DEVICE_MATCH_SCORE, OptionsHandle, Target as MobileTarget, ensure_init, env, get_app,
+	init::command as init_command, log_finished, read_options,
 };
 use crate::{
 	Result,
@@ -58,8 +45,8 @@ mod dev;
 pub(crate) mod project;
 mod xcode_script;
 
-pub const APPLE_DEVELOPMENT_TEAM_ENV_VAR_NAME:&str = "APPLE_DEVELOPMENT_TEAM";
-pub const LIB_OUTPUT_FILE_NAME:&str = "libapp.a";
+pub const APPLE_DEVELOPMENT_TEAM_ENV_VAR_NAME: &str = "APPLE_DEVELOPMENT_TEAM";
+pub const LIB_OUTPUT_FILE_NAME: &str = "libapp.a";
 
 #[derive(Parser)]
 #[clap(
@@ -71,7 +58,7 @@ pub const LIB_OUTPUT_FILE_NAME:&str = "libapp.a";
 )]
 pub struct Cli {
 	#[clap(subcommand)]
-	command:Commands,
+	command: Commands,
 }
 
 #[derive(Debug, Parser)]
@@ -79,13 +66,13 @@ pub struct Cli {
 pub struct InitOptions {
 	/// Skip prompting for values
 	#[clap(long, env = "CI")]
-	ci:bool,
+	ci: bool,
 	/// Reinstall dependencies
 	#[clap(short, long)]
-	reinstall_deps:bool,
+	reinstall_deps: bool,
 	/// Skips installing rust toolchains via rustup
 	#[clap(long)]
-	skip_targets_install:bool,
+	skip_targets_install: bool,
 }
 
 #[derive(Subcommand)]
@@ -97,7 +84,7 @@ enum Commands {
 	XcodeScript(xcode_script::Options),
 }
 
-pub fn command(cli:Cli, verbosity:u8) -> Result<()> {
+pub fn command(cli: Cli, verbosity: u8) -> Result<()> {
 	let noise_level = NoiseLevel::from_occurrences(verbosity as u64);
 
 	match cli.command {
@@ -120,10 +107,10 @@ pub fn command(cli:Cli, verbosity:u8) -> Result<()> {
 }
 
 pub fn get_config(
-	app:&App,
-	tauri_config:&TauriConfig,
-	features:Option<&Vec<String>>,
-	cli_options:&CliOptions,
+	app: &App,
+	tauri_config: &TauriConfig,
+	features: Option<&Vec<String>>,
+	cli_options: &CliOptions,
 ) -> (AppleConfig, AppleMetadata) {
 	let mut ios_options = cli_options.clone();
 
@@ -132,7 +119,7 @@ pub fn get_config(
 	}
 
 	let raw = RawAppleConfig {
-		development_team:std::env::var(APPLE_DEVELOPMENT_TEAM_ENV_VAR_NAME)
+		development_team: std::env::var(APPLE_DEVELOPMENT_TEAM_ENV_VAR_NAME)
 			.ok()
 			.or_else(|| tauri_config.bundle.ios.development_team.clone())
 			.or_else(|| {
@@ -168,10 +155,10 @@ pub fn get_config(
 					},
 				}
 			}),
-		ios_features:ios_options.features.clone(),
-		bundle_version:tauri_config.version.clone(),
-		bundle_version_short:tauri_config.version.clone(),
-		ios_version:Some(tauri_config.bundle.ios.minimum_system_version.clone()),
+		ios_features: ios_options.features.clone(),
+		bundle_version: tauri_config.version.clone(),
+		bundle_version_short: tauri_config.version.clone(),
+		ios_version: Some(tauri_config.bundle.ios.minimum_system_version.clone()),
 		..Default::default()
 	};
 
@@ -202,15 +189,15 @@ pub fn get_config(
 	}
 
 	let metadata = AppleMetadata {
-		supported:true,
-		ios:ApplePlatform {
-			cargo_args:Some(ios_options.args),
-			features:ios_options.features,
-			frameworks:Some(frameworks),
-			vendor_frameworks:Some(vendor_frameworks),
+		supported: true,
+		ios: ApplePlatform {
+			cargo_args: Some(ios_options.args),
+			features: ios_options.features,
+			frameworks: Some(frameworks),
+			vendor_frameworks: Some(vendor_frameworks),
 			..Default::default()
 		},
-		macos:Default::default(),
+		macos: Default::default(),
 	};
 
 	set_var("TAURI_IOS_PROJECT_PATH", config.project_dir());
@@ -220,7 +207,7 @@ pub fn get_config(
 	(config, metadata)
 }
 
-fn connected_device_prompt<'a>(env:&'_ Env, target:Option<&str>) -> Result<Device<'a>> {
+fn connected_device_prompt<'a>(env: &'_ Env, target: Option<&str>) -> Result<Device<'a>> {
 	let device_list = device::list_devices(env)
 		.map_err(|cause| anyhow::anyhow!("Failed to detect connected iOS devices: {cause}"))?;
 
@@ -267,10 +254,9 @@ fn connected_device_prompt<'a>(env:&'_ Env, target:Option<&str>) -> Result<Devic
 	}
 }
 
-fn simulator_prompt(env:&'_ Env, target:Option<&str>) -> Result<device::Simulator> {
-	let simulator_list = device::list_simulators(env).map_err(|cause| {
-		anyhow::anyhow!("Failed to detect connected iOS Simulator devices: {cause}")
-	})?;
+fn simulator_prompt(env: &'_ Env, target: Option<&str>) -> Result<device::Simulator> {
+	let simulator_list = device::list_simulators(env)
+		.map_err(|cause| anyhow::anyhow!("Failed to detect connected iOS Simulator devices: {cause}"))?;
 
 	if !simulator_list.is_empty() {
 		let device = if let Some(t) = target {
@@ -298,9 +284,7 @@ fn simulator_prompt(env:&'_ Env, target:Option<&str>) -> Result<device::Simulato
 				None,
 				"Simulator",
 			)
-			.map_err(|cause| {
-				anyhow::anyhow!("Failed to prompt for iOS Simulator device: {cause}")
-			})?;
+			.map_err(|cause| anyhow::anyhow!("Failed to prompt for iOS Simulator device: {cause}"))?;
 
 			simulator_list.into_iter().nth(index).unwrap()
 		} else {
@@ -313,7 +297,7 @@ fn simulator_prompt(env:&'_ Env, target:Option<&str>) -> Result<device::Simulato
 	}
 }
 
-fn device_prompt<'a>(env:&'_ Env, target:Option<&str>) -> Result<Device<'a>> {
+fn device_prompt<'a>(env: &'_ Env, target: Option<&str>) -> Result<Device<'a>> {
 	if let Ok(device) = connected_device_prompt(env, target) {
 		Ok(device)
 	} else {
@@ -327,11 +311,11 @@ fn device_prompt<'a>(env:&'_ Env, target:Option<&str>) -> Result<Device<'a>> {
 	}
 }
 
-fn detect_target_ok<'a>(env:&Env) -> Option<&'a Target<'a>> {
+fn detect_target_ok<'a>(env: &Env) -> Option<&'a Target<'a>> {
 	device_prompt(env, None).map(|device| device.target()).ok()
 }
 
-fn open_and_wait(config:&AppleConfig, env:&Env) -> ! {
+fn open_and_wait(config: &AppleConfig, env: &Env) -> ! {
 	log::info!("Opening Xcode");
 
 	if let Err(e) = os::open_file_with("Xcode", config.project_dir(), env) {
@@ -343,7 +327,7 @@ fn open_and_wait(config:&AppleConfig, env:&Env) -> ! {
 	}
 }
 
-fn inject_resources(config:&AppleConfig, tauri_config:&TauriConfig) -> Result<()> {
+fn inject_resources(config: &AppleConfig, tauri_config: &TauriConfig) -> Result<()> {
 	let asset_dir = config.project_dir().join(DEFAULT_ASSET_DIR);
 
 	create_dir_all(&asset_dir)?;
@@ -373,13 +357,17 @@ enum PlistKind {
 }
 
 impl From<PathBuf> for PlistKind {
-	fn from(p:PathBuf) -> Self { Self::Path(p) }
+	fn from(p: PathBuf) -> Self {
+		Self::Path(p)
+	}
 }
 impl From<plist::Value> for PlistKind {
-	fn from(p:plist::Value) -> Self { Self::Plist(p) }
+	fn from(p: plist::Value) -> Self {
+		Self::Plist(p)
+	}
 }
 
-fn merge_plist(src:Vec<PlistKind>) -> Result<plist::Value> {
+fn merge_plist(src: Vec<PlistKind>) -> Result<plist::Value> {
 	let mut merged_plist = plist::Dictionary::new();
 
 	for plist_kind in src {
@@ -408,8 +396,7 @@ pub fn signing_from_env() -> Result<(
 		(Some(certificate), Some(certificate_password)) => {
 			log::info!("Reading iOS certificates from ");
 
-			tauri_macos_sign::Keychain::with_certificate(&certificate, &certificate_password)
-				.map(Some)?
+			tauri_macos_sign::Keychain::with_certificate(&certificate, &certificate_password).map(Some)?
 		},
 		(Some(_), None) => {
 			log::warn!(
@@ -440,23 +427,23 @@ pub fn signing_from_env() -> Result<(
 }
 
 pub struct ProjectConfig {
-	pub code_sign_identity:Option<String>,
-	pub team_id:Option<String>,
-	pub provisioning_profile_uuid:Option<String>,
+	pub code_sign_identity: Option<String>,
+	pub team_id: Option<String>,
+	pub provisioning_profile_uuid: Option<String>,
 }
 
 pub fn project_config(
-	keychain:Option<&tauri_macos_sign::Keychain>,
-	provisioning_profile:Option<&tauri_macos_sign::ProvisioningProfile>,
+	keychain: Option<&tauri_macos_sign::Keychain>,
+	provisioning_profile: Option<&tauri_macos_sign::ProvisioningProfile>,
 ) -> Result<ProjectConfig> {
 	Ok(ProjectConfig {
-		code_sign_identity:keychain.map(|k| k.signing_identity()),
-		team_id:keychain.and_then(|k| k.team_id().map(ToString::to_string)),
-		provisioning_profile_uuid:provisioning_profile.and_then(|p| p.uuid().ok()),
+		code_sign_identity: keychain.map(|k| k.signing_identity()),
+		team_id: keychain.and_then(|k| k.team_id().map(ToString::to_string)),
+		provisioning_profile_uuid: provisioning_profile.and_then(|p| p.uuid().ok()),
 	})
 }
 
-pub fn load_pbxproj(config:&AppleConfig) -> Result<pbxproj::Pbxproj> {
+pub fn load_pbxproj(config: &AppleConfig) -> Result<pbxproj::Pbxproj> {
 	pbxproj::parse(
 		config
 			.project_dir()
@@ -466,17 +453,17 @@ pub fn load_pbxproj(config:&AppleConfig) -> Result<pbxproj::Pbxproj> {
 }
 
 pub fn synchronize_project_config(
-	config:&AppleConfig,
-	tauri_config:&ConfigHandle,
-	pbxproj:&mut pbxproj::Pbxproj,
-	export_options_list:&mut plist::Dictionary,
-	project_config:&ProjectConfig,
-	debug:bool,
+	config: &AppleConfig,
+	tauri_config: &ConfigHandle,
+	pbxproj: &mut pbxproj::Pbxproj,
+	export_options_list: &mut plist::Dictionary,
+	project_config: &ProjectConfig,
+	debug: bool,
 ) -> Result<()> {
 	let identifier = tauri_config.lock().unwrap().as_ref().unwrap().identifier.clone();
 
-	let manual_signing = project_config.code_sign_identity.is_some()
-		|| project_config.provisioning_profile_uuid.is_some();
+	let manual_signing =
+		project_config.code_sign_identity.is_some() || project_config.provisioning_profile_uuid.is_some();
 
 	if let Some(xc_configuration_list) = pbxproj
 		.xc_configuration_list
@@ -495,20 +482,12 @@ pub fn synchronize_project_config(
 				pbxproj.set_build_settings(&build_configuration_ref.id, "DEVELOPMENT_TEAM", team);
 			}
 
-			pbxproj.set_build_settings(
-				&build_configuration_ref.id,
-				"PRODUCT_BUNDLE_IDENTIFIER",
-				&identifier,
-			);
+			pbxproj.set_build_settings(&build_configuration_ref.id, "PRODUCT_BUNDLE_IDENTIFIER", &identifier);
 
 			if let Some(identity) = &project_config.code_sign_identity {
 				let identity = format!("\"{identity}\"");
 
-				pbxproj.set_build_settings(
-					&build_configuration_ref.id,
-					"CODE_SIGN_IDENTITY",
-					&identity,
-				);
+				pbxproj.set_build_settings(&build_configuration_ref.id, "CODE_SIGN_IDENTITY", &identity);
 
 				pbxproj.set_build_settings(
 					&build_configuration_ref.id,
@@ -520,11 +499,7 @@ pub fn synchronize_project_config(
 			if let Some(id) = &project_config.team_id {
 				pbxproj.set_build_settings(&build_configuration_ref.id, "DEVELOPMENT_TEAM", id);
 
-				pbxproj.set_build_settings(
-					&build_configuration_ref.id,
-					"\"DEVELOPMENT_TEAM[sdk=iphoneos*]\"",
-					id,
-				);
+				pbxproj.set_build_settings(&build_configuration_ref.id, "\"DEVELOPMENT_TEAM[sdk=iphoneos*]\"", id);
 			}
 
 			if let Some(profile_uuid) = &project_config.provisioning_profile_uuid {
@@ -572,16 +547,14 @@ pub fn synchronize_project_config(
 
 	if let Some(build_configuration) = build_configuration {
 		if let Some(style) = build_configuration.get_build_setting("CODE_SIGN_STYLE") {
-			export_options_list
-				.insert("signingStyle".to_string(), style.value.to_lowercase().into());
+			export_options_list.insert("signingStyle".to_string(), style.value.to_lowercase().into());
 		}
 
 		if let Some(identity) = build_configuration
 			.get_build_setting("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"")
 			.or_else(|| build_configuration.get_build_setting("CODE_SIGN_IDENTITY"))
 		{
-			export_options_list
-				.insert("signingCertificate".to_string(), identity.value.trim_matches('"').into());
+			export_options_list.insert("signingCertificate".to_string(), identity.value.trim_matches('"').into());
 		}
 
 		if let Some(id) = build_configuration
@@ -601,11 +574,9 @@ pub fn synchronize_project_config(
 		if let Some(profile_uuid) = profile_uuid {
 			let mut provisioning_profiles = plist::Dictionary::new();
 
-			provisioning_profiles
-				.insert(config.app().identifier().to_string(), profile_uuid.into());
+			provisioning_profiles.insert(config.app().identifier().to_string(), profile_uuid.into());
 
-			export_options_list
-				.insert("provisioningProfiles".to_string(), provisioning_profiles.into());
+			export_options_list.insert("provisioningProfiles".to_string(), provisioning_profiles.into());
 		}
 	}
 

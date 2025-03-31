@@ -7,23 +7,23 @@ import { Image } from "./image";
 import { Theme } from "./window";
 
 export type DataStoreIdentifier = [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number
-]
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+	number,
+];
 
 /**
  * Application metadata and related APIs.
@@ -87,7 +87,7 @@ async function getTauriVersion(): Promise<string> {
  * @since 2.4.0
  */
 async function getIdentifier(): Promise<string> {
-  return invoke('plugin:app|identifier')
+	return invoke("plugin:app|identifier");
 }
 
 /**
@@ -134,7 +134,7 @@ async function hide(): Promise<void> {
  * @since 2.4.0
  */
 async function fetchDataStoreIdentifiers(): Promise<DataStoreIdentifier[]> {
-  return invoke('plugin:app|fetch_data_store_identifiers')
+	return invoke("plugin:app|fetch_data_store_identifiers");
 }
 
 /**
@@ -155,9 +155,9 @@ async function fetchDataStoreIdentifiers(): Promise<DataStoreIdentifier[]> {
  * @since 2.4.0
  */
 async function removeDataStore(
-  uuid: DataStoreIdentifier
+	uuid: DataStoreIdentifier,
 ): Promise<DataStoreIdentifier[]> {
-  return invoke('plugin:app|remove_data_store', { uuid })
+	return invoke("plugin:app|remove_data_store", { uuid });
 }
 
 /**
@@ -197,14 +197,14 @@ async function setTheme(theme?: Theme | null): Promise<void> {
 }
 
 export {
-  getName,
-  getVersion,
-  getTauriVersion,
-  getIdentifier,
-  show,
-  hide,
-  defaultWindowIcon,
-  setTheme,
-  fetchDataStoreIdentifiers,
-  removeDataStore
-}
+	getName,
+	getVersion,
+	getTauriVersion,
+	getIdentifier,
+	show,
+	hide,
+	defaultWindowIcon,
+	setTheme,
+	fetchDataStoreIdentifiers,
+	removeDataStore,
+};

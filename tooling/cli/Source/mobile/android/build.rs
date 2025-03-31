@@ -13,21 +13,11 @@ use cargo_mobile2::{
 use clap::{ArgAction, Parser};
 
 use super::{
-	MobileTarget,
-	OptionsHandle,
-	configure_cargo,
-	delete_codegen_vars,
-	ensure_init,
-	env,
-	get_app,
-	get_config,
-	inject_resources,
-	log_finished,
-	open_and_wait,
+	MobileTarget, OptionsHandle, configure_cargo, delete_codegen_vars, ensure_init, env, get_app, get_config,
+	inject_resources, log_finished, open_and_wait,
 };
 use crate::{
-	ConfigValue,
-	Result,
+	ConfigValue, Result,
 	build::Options as BuildOptions,
 	helpers::{
 		app_paths::tauri_dir,
@@ -49,7 +39,7 @@ use crate::{
 pub struct Options {
 	/// Builds with the debug flag
 	#[clap(short, long)]
-	pub debug:bool,
+	pub debug: bool,
 	/// Which targets to build (all by default).
 	#[clap(
     short,
@@ -58,52 +48,52 @@ pub struct Options {
     num_args(0..),
     value_parser(clap::builder::PossibleValuesParser::new(Target::name_list()))
   )]
-	pub targets:Option<Vec<String>>,
+	pub targets: Option<Vec<String>>,
 	/// List of cargo features to activate
 	#[clap(short, long, action = ArgAction::Append, num_args(0..))]
-	pub features:Option<Vec<String>>,
+	pub features: Option<Vec<String>>,
 	/// JSON string or path to JSON file to merge with tauri.conf.json
 	#[clap(short, long)]
-	pub config:Option<ConfigValue>,
+	pub config: Option<ConfigValue>,
 	/// Whether to split the APKs and AABs per ABIs.
 	#[clap(long)]
-	pub split_per_abi:bool,
+	pub split_per_abi: bool,
 	/// Build APKs.
 	#[clap(long)]
-	pub apk:bool,
+	pub apk: bool,
 	/// Build AABs.
 	#[clap(long)]
-	pub aab:bool,
+	pub aab: bool,
 	/// Open Android Studio
 	#[clap(short, long)]
-	pub open:bool,
+	pub open: bool,
 	/// Skip prompting for values
 	#[clap(long, env = "CI")]
-	pub ci:bool,
+	pub ci: bool,
 }
 
 impl From<Options> for BuildOptions {
-	fn from(options:Options) -> Self {
+	fn from(options: Options) -> Self {
 		Self {
-			runner:None,
-			debug:options.debug,
-			target:None,
-			features:options.features,
-			bundles:None,
-			no_bundle:false,
-			config:options.config,
-			args:Vec::new(),
-			ci:options.ci,
+			runner: None,
+			debug: options.debug,
+			target: None,
+			features: options.features,
+			bundles: None,
+			no_bundle: false,
+			config: options.config,
+			args: Vec::new(),
+			ci: options.ci,
 		}
 	}
 }
 
-pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
+pub fn command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 	crate::helpers::app_paths::resolve();
 
 	delete_codegen_vars();
 
-	let mut build_options:BuildOptions = options.clone().into();
+	let mut build_options: BuildOptions = options.clone().into();
 
 	let first_target = Target::all()
 		.get(
@@ -117,10 +107,7 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 	build_options.target = Some(first_target.triple.into());
 
-	let tauri_config = get_tauri_config(
-		tauri_utils::platform::Target::Android,
-		options.config.as_ref().map(|c| &c.0),
-	)?;
+	let tauri_config = get_tauri_config(tauri_utils::platform::Target::Android, options.config.as_ref().map(|c| &c.0))?;
 
 	let (interface, config, metadata) = {
 		let tauri_config_guard = tauri_config.lock().unwrap();
@@ -133,8 +120,7 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 		let app = get_app(MobileTarget::Android, tauri_config_, &interface);
 
-		let (config, metadata) =
-			get_config(&app, tauri_config_, build_options.features.as_ref(), &Default::default());
+		let (config, metadata) = get_config(&app, tauri_config_, build_options.features.as_ref(), &Default::default());
 		(interface, config, metadata)
 	};
 
@@ -177,14 +163,14 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 #[allow(clippy::too_many_arguments)]
 fn run_build(
-	interface:AppInterface,
-	mut options:Options,
-	build_options:BuildOptions,
-	tauri_config:ConfigHandle,
-	profile:Profile,
-	config:&AndroidConfig,
-	env:&mut Env,
-	noise_level:NoiseLevel,
+	interface: AppInterface,
+	mut options: Options,
+	build_options: BuildOptions,
+	tauri_config: ConfigHandle,
+	profile: Profile,
+	config: &AndroidConfig,
+	env: &mut Env,
+	noise_level: NoiseLevel,
 ) -> Result<OptionsHandle> {
 	if !(options.apk || options.aab) {
 		// if the user didn't specify the format to build, we'll do both
@@ -194,8 +180,8 @@ fn run_build(
 	}
 
 	let interface_options = InterfaceOptions {
-		debug:build_options.debug,
-		target:build_options.target.clone(),
+		debug: build_options.debug,
+		target: build_options.target.clone(),
 		..Default::default()
 	};
 
@@ -208,17 +194,16 @@ fn run_build(
 	let _lock = flock::open_rw(out_dir.join("lock").with_extension("android"), "Android")?;
 
 	let cli_options = CliOptions {
-		dev:false,
-		features:build_options.features.clone(),
-		args:build_options.args.clone(),
+		dev: false,
+		features: build_options.features.clone(),
+		args: build_options.args.clone(),
 		noise_level,
-		vars:Default::default(),
-		config:build_options.config.clone(),
-		target_device:None,
+		vars: Default::default(),
+		config: build_options.config.clone(),
+		target_device: None,
 	};
 
-	let handle =
-		write_options(&tauri_config.lock().unwrap().as_ref().unwrap().identifier, cli_options)?;
+	let handle = write_options(&tauri_config.lock().unwrap().as_ref().unwrap().identifier, cli_options)?;
 
 	inject_resources(config, tauri_config.lock().unwrap().as_ref().unwrap())?;
 
@@ -255,7 +240,7 @@ fn run_build(
 	Ok(handle)
 }
 
-fn get_targets_or_all<'a>(targets:Vec<String>) -> Result<Vec<&'a Target<'a>>> {
+fn get_targets_or_all<'a>(targets: Vec<String>) -> Result<Vec<&'a Target<'a>>> {
 	if targets.is_empty() {
 		Ok(Target::all().iter().map(|t| t.1).collect())
 	} else {
@@ -269,11 +254,7 @@ fn get_targets_or_all<'a>(targets:Vec<String>) -> Result<Vec<&'a Target<'a>>> {
 
 		for t in targets {
 			let target = Target::for_name(&t).ok_or_else(|| {
-				anyhow::anyhow!(
-					"Target {} is invalid; the possible targets are {}",
-					t,
-					possible_targets
-				)
+				anyhow::anyhow!("Target {} is invalid; the possible targets are {}", t, possible_targets)
 			})?;
 
 			outs.push(target);

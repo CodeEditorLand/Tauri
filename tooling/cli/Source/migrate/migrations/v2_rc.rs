@@ -31,13 +31,12 @@ pub fn run() -> Result<()> {
 
 	migrate_npm_dependencies(app_dir)?;
 
-	std::fs::write(&manifest_path, serialize_manifest(&manifest))
-		.context("failed to rewrite Cargo manifest")?;
+	std::fs::write(&manifest_path, serialize_manifest(&manifest)).context("failed to rewrite Cargo manifest")?;
 
 	Ok(())
 }
 
-fn migrate_npm_dependencies(app_dir:&Path) -> Result<()> {
+fn migrate_npm_dependencies(app_dir: &Path) -> Result<()> {
 	let pm = PackageManager::from_project(app_dir)
 		.into_iter()
 		.next()
@@ -74,8 +73,7 @@ fn migrate_npm_dependencies(app_dir:&Path) -> Result<()> {
 		"@tauri-apps/plugin-websocket",
 		"@tauri-apps/plugin-window-state",
 	] {
-		let version =
-			pm.current_package_version(pkg, app_dir).unwrap_or_default().unwrap_or_default();
+		let version = pm.current_package_version(pkg, app_dir).unwrap_or_default().unwrap_or_default();
 
 		if version.starts_with('1') {
 			install_deps.push(format!("{pkg}@^2.0.0-rc.0"));
@@ -89,7 +87,7 @@ fn migrate_npm_dependencies(app_dir:&Path) -> Result<()> {
 	Ok(())
 }
 
-fn migrate_permissions(tauri_dir:&Path) -> Result<()> {
+fn migrate_permissions(tauri_dir: &Path) -> Result<()> {
 	let core_plugins = [
 		"app",
 		"event",
@@ -111,8 +109,7 @@ fn migrate_permissions(tauri_dir:&Path) -> Result<()> {
 			let mut capability = read_to_string(path).context("failed to read capability")?;
 
 			for plugin in core_plugins {
-				capability =
-					capability.replace(&format!("\"{plugin}:"), &format!("\"core:{plugin}:"));
+				capability = capability.replace(&format!("\"{plugin}:"), &format!("\"core:{plugin}:"));
 			}
 
 			std::fs::write(path, capability).context("failed to rewrite capability")?;
@@ -122,7 +119,7 @@ fn migrate_permissions(tauri_dir:&Path) -> Result<()> {
 	Ok(())
 }
 
-fn migrate_manifest(manifest:&mut DocumentMut) -> Result<()> {
+fn migrate_manifest(manifest: &mut DocumentMut) -> Result<()> {
 	let version = "2.0.0-rc.0";
 
 	let dependencies = manifest
@@ -178,7 +175,7 @@ fn migrate_manifest(manifest:&mut DocumentMut) -> Result<()> {
 	Ok(())
 }
 
-fn migrate_dependency(dependencies:&mut Table, name:&str, version:&str) {
+fn migrate_dependency(dependencies: &mut Table, name: &str, version: &str) {
 	let item = dependencies.entry(name).or_insert(Item::None);
 
 	// do not rewrite if dependency uses workspace inheritance
@@ -200,6 +197,6 @@ fn migrate_dependency(dependencies:&mut Table, name:&str, version:&str) {
 	}
 }
 
-fn migrate_dependency_table<D:TableLike>(dep:&mut D, version:&str) {
+fn migrate_dependency_table<D: TableLike>(dep: &mut D, version: &str) {
 	*dep.entry("version").or_insert(Item::None) = Item::Value(version.into());
 }

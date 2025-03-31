@@ -17,11 +17,11 @@ use crate::{
 	helpers::{app_paths::walk_builder, cargo, npm::PackageManager},
 };
 
-const RENAMED_MODULES:phf::Map<&str, &str> = phf::phf_map! {
+const RENAMED_MODULES: phf::Map<&str, &str> = phf::phf_map! {
   "tauri" => "core",
   "window" => "webviewWindow"
 };
-const PLUGINIFIED_MODULES:[&str; 11] = [
+const PLUGINIFIED_MODULES: [&str; 11] = [
 	"cli",
 	"clipboard",
 	"dialog",
@@ -35,7 +35,7 @@ const PLUGINIFIED_MODULES:[&str; 11] = [
 	"updater",
 ];
 // (from, to)
-const MODULES_MAP:phf::Map<&str, &str> = phf::phf_map! {
+const MODULES_MAP: phf::Map<&str, &str> = phf::phf_map! {
   // renamed
   "@tauri-apps/api/tauri" => "@tauri-apps/api/core",
   "@tauri-apps/api/window" => "@tauri-apps/api/webviewWindow",
@@ -52,10 +52,10 @@ const MODULES_MAP:phf::Map<&str, &str> = phf::phf_map! {
   "@tauri-apps/api/shell" => "@tauri-apps/plugin-shell",
   "@tauri-apps/api/updater" => "@tauri-apps/plugin-updater",
 };
-const JS_EXTENSIONS:&[&str] = &["js", "mjs", "jsx", "ts", "mts", "tsx"];
+const JS_EXTENSIONS: &[&str] = &["js", "mjs", "jsx", "ts", "mts", "tsx"];
 
 /// Returns a list of paths that could not be migrated
-pub fn migrate(app_dir:&Path, tauri_dir:&Path) -> Result<()> {
+pub fn migrate(app_dir: &Path, tauri_dir: &Path) -> Result<()> {
 	let mut new_npm_packages = Vec::new();
 
 	let mut new_cargo_packages = Vec::new();
@@ -80,8 +80,7 @@ pub fn migrate(app_dir:&Path, tauri_dir:&Path) -> Result<()> {
 		.unwrap_or(PackageManager::Npm);
 
 	for pkg in ["@tauri-apps/cli", "@tauri-apps/api"] {
-		let version =
-			pm.current_package_version(pkg, app_dir).unwrap_or_default().unwrap_or_default();
+		let version = pm.current_package_version(pkg, app_dir).unwrap_or_default().unwrap_or_default();
 
 		if version.starts_with("1") {
 			new_npm_packages.push(format!("{pkg}@^{npm_version}"));
@@ -97,16 +96,10 @@ pub fn migrate(app_dir:&Path, tauri_dir:&Path) -> Result<()> {
 			if JS_EXTENSIONS.iter().any(|e| e == &ext) {
 				let js_contents = std::fs::read_to_string(path)?;
 
-				let new_contents = migrate_imports(
-					path,
-					&js_contents,
-					&mut new_cargo_packages,
-					&mut new_npm_packages,
-				)?;
+				let new_contents = migrate_imports(path, &js_contents, &mut new_cargo_packages, &mut new_npm_packages)?;
 
 				if new_contents != js_contents {
-					fs::write(path, new_contents)
-						.with_context(|| format!("Error writing {}", path.display()))?;
+					fs::write(path, new_contents).with_context(|| format!("Error writing {}", path.display()))?;
 				}
 			}
 		}
@@ -126,18 +119,17 @@ pub fn migrate(app_dir:&Path, tauri_dir:&Path) -> Result<()> {
 	new_cargo_packages.dedup();
 
 	if !new_cargo_packages.is_empty() {
-		cargo::install(&new_cargo_packages, Some(tauri_dir))
-			.context("Error installing new Cargo packages")?;
+		cargo::install(&new_cargo_packages, Some(tauri_dir)).context("Error installing new Cargo packages")?;
 	}
 
 	Ok(())
 }
 
 fn migrate_imports<'a>(
-	path:&'a Path,
-	js_source:&'a str,
-	new_cargo_packages:&mut Vec<String>,
-	new_npm_packages:&mut Vec<String>,
+	path: &'a Path,
+	js_source: &'a str,
+	new_cargo_packages: &mut Vec<String>,
+	new_npm_packages: &mut Vec<String>,
 ) -> crate::Result<String> {
 	let mut magic_js_source = MagicString::new(js_source);
 
@@ -227,11 +219,8 @@ fn migrate_imports<'a>(
 						// import dialog from "@tauri-apps/plugin-dialog"
 						// import cli as superCli from "@tauri-apps/plugin-cli"
 						// ```
-						import
-							if PLUGINIFIED_MODULES.contains(&import)
-								&& module == "@tauri-apps/api" =>
-						{
-							let js_plugin:&str = MODULES_MAP[&format!("@tauri-apps/api/{import}")];
+						import if PLUGINIFIED_MODULES.contains(&import) && module == "@tauri-apps/api" => {
+							let js_plugin: &str = MODULES_MAP[&format!("@tauri-apps/api/{import}")];
 
 							let (_, plugin_name) = js_plugin.split_once("plugin-").unwrap();
 
@@ -244,22 +233,17 @@ fn migrate_imports<'a>(
 							if specifier.local.name.as_str() != import {
 								let local = &specifier.local.name;
 
-								imports_to_add.push(format!(
-									"\nimport {import} as {local} from \"{js_plugin}\""
-								));
+								imports_to_add.push(format!("\nimport {import} as {local} from \"{js_plugin}\""));
 							} else {
-								imports_to_add
-									.push(format!("\nimport {import} from \"{js_plugin}\""));
+								imports_to_add.push(format!("\nimport {import} from \"{js_plugin}\""));
 							};
 
 							None
 						},
 
-						import if module == "@tauri-apps/api" => {
-							match RENAMED_MODULES.get(import) {
-								Some(m) => Some(*m),
-								None => continue,
-							}
+						import if module == "@tauri-apps/api" => match RENAMED_MODULES.get(import) {
+							Some(m) => Some(*m),
+							None => continue,
 						},
 
 						// nothing to do, go to next specifier
@@ -289,8 +273,7 @@ fn migrate_imports<'a>(
 
 						let sliced = &js_source[start..];
 
-						let comma_or_bracket =
-							sliced.chars().find_position(|&c| c == ',' || c == '}');
+						let comma_or_bracket = sliced.chars().find_position(|&c| c == ',' || c == '}');
 
 						let end = match comma_or_bracket {
 							Some((n, ',')) => n + start + 1,
@@ -315,11 +298,9 @@ fn migrate_imports<'a>(
 		.iter()
 		.rev()
 		.find(|s| matches!(s, Statement::ImportDeclaration(_)))
-		.map(|s| {
-			match s {
-				Statement::ImportDeclaration(s) => s.span.end,
-				_ => unreachable!(),
-			}
+		.map(|s| match s {
+			Statement::ImportDeclaration(s) => s.span.end,
+			_ => unreachable!(),
 		})
 		.unwrap_or(program.span.start);
 
@@ -510,13 +491,8 @@ export default App;
 
 		let mut new_npm_packages = Vec::new();
 
-		let migrated = migrate_imports(
-			Path::new("file.js"),
-			input,
-			&mut new_cargo_packages,
-			&mut new_npm_packages,
-		)
-		.unwrap();
+		let migrated =
+			migrate_imports(Path::new("file.js"), input, &mut new_cargo_packages, &mut new_npm_packages).unwrap();
 
 		assert_eq!(migrated, expected);
 

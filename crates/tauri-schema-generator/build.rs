@@ -19,7 +19,7 @@ macro_rules! schema {
 
 #[derive(Deserialize)]
 pub struct VersionMetadata {
-	tauri:String,
+	tauri: String,
 }
 
 pub fn main() -> Result<(), Box<dyn Error>> {

@@ -20,8 +20,8 @@ use crate::helpers::{
 
 #[derive(Default)]
 pub struct Manifest {
-	pub inner:DocumentMut,
-	pub tauri_features:HashSet<String>,
+	pub inner: DocumentMut,
+	pub tauri_features: HashSet<String>,
 }
 
 impl Manifest {
@@ -47,9 +47,8 @@ impl Manifest {
 		f
 	}
 
-	pub fn all_enabled_features(&self, enabled_features:&[String]) -> Vec<String> {
-		let mut all_enabled_features:Vec<String> =
-			self.tauri_features.iter().map(|f| format!("tauri/{f}")).collect();
+	pub fn all_enabled_features(&self, enabled_features: &[String]) -> Vec<String> {
+		let mut all_enabled_features: Vec<String> = self.tauri_features.iter().map(|f| format!("tauri/{f}")).collect();
 
 		let manifest_features = self.features();
 
@@ -61,7 +60,7 @@ impl Manifest {
 	}
 }
 
-fn get_enabled_features(list:&HashMap<String, Vec<String>>, feature:&str) -> Vec<String> {
+fn get_enabled_features(list: &HashMap<String, Vec<String>>, feature: &str) -> Vec<String> {
 	let mut f = Vec::new();
 
 	if let Some(enabled_features) = list.get(feature) {
@@ -77,22 +76,22 @@ fn get_enabled_features(list:&HashMap<String, Vec<String>>, feature:&str) -> Vec
 	f
 }
 
-pub fn read_manifest(manifest_path:&Path) -> crate::Result<(DocumentMut, String)> {
+pub fn read_manifest(manifest_path: &Path) -> crate::Result<(DocumentMut, String)> {
 	let mut manifest_str = String::new();
 
-	let mut manifest_file = File::open(manifest_path)
-		.with_context(|| format!("failed to open `{manifest_path:?}` file"))?;
+	let mut manifest_file =
+		File::open(manifest_path).with_context(|| format!("failed to open `{manifest_path:?}` file"))?;
 
 	manifest_file.read_to_string(&mut manifest_str)?;
 
-	let manifest:DocumentMut = manifest_str
+	let manifest: DocumentMut = manifest_str
 		.parse::<DocumentMut>()
 		.with_context(|| "failed to parse Cargo.toml")?;
 
 	Ok((manifest, manifest_str))
 }
 
-pub fn serialize_manifest(manifest:&DocumentMut) -> String {
+pub fn serialize_manifest(manifest: &DocumentMut) -> String {
 	manifest
     .to_string()
     // apply some formatting fixes
@@ -104,10 +103,10 @@ pub fn serialize_manifest(manifest:&DocumentMut) -> String {
     .replace(r#"",""#, r#"", ""#)
 }
 
-pub fn toml_array(features:&HashSet<String>) -> Array {
+pub fn toml_array(features: &HashSet<String>) -> Array {
 	let mut f = Array::default();
 
-	let mut features:Vec<String> = features.iter().map(|f| f.to_string()).collect();
+	let mut features: Vec<String> = features.iter().map(|f| f.to_string()).collect();
 
 	features.sort();
 
@@ -118,11 +117,7 @@ pub fn toml_array(features:&HashSet<String>) -> Array {
 	f
 }
 
-fn find_dependency<'a>(
-	manifest:&'a mut DocumentMut,
-	name:&'a str,
-	kind:DependencyKind,
-) -> Vec<&'a mut Item> {
+fn find_dependency<'a>(manifest: &'a mut DocumentMut, name: &'a str, kind: DependencyKind) -> Vec<&'a mut Item> {
 	let table = match kind {
 		DependencyKind::Build => "build-dependencies",
 		DependencyKind::Normal => "dependencies",
@@ -157,11 +152,11 @@ fn find_dependency<'a>(
 	Vec::new()
 }
 
-fn write_features<F:Fn(&str) -> bool>(
-	dependency_name:&str,
-	item:&mut Item,
-	is_managed_feature:F,
-	features:&mut HashSet<String>,
+fn write_features<F: Fn(&str) -> bool>(
+	dependency_name: &str,
+	item: &mut Item,
+	is_managed_feature: F,
+	features: &mut HashSet<String>,
 ) -> crate::Result<bool> {
 	if let Some(dep) = item.as_table_mut() {
 		inject_features_table(dep, is_managed_feature, features);
@@ -202,16 +197,16 @@ enum DependencyKind {
 
 #[derive(Debug)]
 struct DependencyAllowlist {
-	name:String,
-	kind:DependencyKind,
-	all_cli_managed_features:Vec<&'static str>,
-	features:HashSet<String>,
+	name: String,
+	kind: DependencyKind,
+	all_cli_managed_features: Vec<&'static str>,
+	features: HashSet<String>,
 }
 
-fn inject_features_table<D:TableLike, F:Fn(&str) -> bool>(
-	dep:&mut D,
-	is_managed_feature:F,
-	features:&mut HashSet<String>,
+fn inject_features_table<D: TableLike, F: Fn(&str) -> bool>(
+	dep: &mut D,
+	is_managed_feature: F,
+	features: &mut HashSet<String>,
 ) {
 	let manifest_features = dep.entry("features").or_insert(Item::None);
 
@@ -252,10 +247,7 @@ fn inject_features_table<D:TableLike, F:Fn(&str) -> bool>(
 	}
 }
 
-fn inject_features(
-	manifest:&mut DocumentMut,
-	dependencies:&mut Vec<DependencyAllowlist>,
-) -> crate::Result<bool> {
+fn inject_features(manifest: &mut DocumentMut, dependencies: &mut Vec<DependencyAllowlist>) -> crate::Result<bool> {
 	let mut persist = false;
 
 	for dependency in dependencies {
@@ -274,11 +266,10 @@ fn inject_features(
 			} else {
 				let all_cli_managed_features = dependency.all_cli_managed_features.clone();
 
-				let is_managed_feature:Box<dyn Fn(&str) -> bool> =
+				let is_managed_feature: Box<dyn Fn(&str) -> bool> =
 					Box::new(move |feature| all_cli_managed_features.contains(&feature));
 
-				let should_write =
-					write_features(&name, item, is_managed_feature, &mut dependency.features)?;
+				let should_write = write_features(&name, item, is_managed_feature, &mut dependency.features)?;
 
 				if !persist {
 					persist = should_write;
@@ -290,7 +281,7 @@ fn inject_features(
 	Ok(persist)
 }
 
-pub fn rewrite_manifest(config:&Config) -> crate::Result<(Manifest, bool)> {
+pub fn rewrite_manifest(config: &Config) -> crate::Result<(Manifest, bool)> {
 	let manifest_path = tauri_dir().join("Cargo.toml");
 
 	let (mut manifest, original_manifest_str) = read_manifest(&manifest_path)?;
@@ -305,24 +296,23 @@ pub fn rewrite_manifest(config:&Config) -> crate::Result<(Manifest, bool)> {
 	}
 
 	dependencies.push(DependencyAllowlist {
-		name:"tauri-build".into(),
-		kind:DependencyKind::Build,
-		all_cli_managed_features:vec!["isolation"],
-		features:tauri_build_features,
+		name: "tauri-build".into(),
+		kind: DependencyKind::Build,
+		all_cli_managed_features: vec!["isolation"],
+		features: tauri_build_features,
 	});
 
 	// tauri
-	let tauri_features =
-		HashSet::from_iter(config.app.features().into_iter().map(|f| f.to_string()));
+	let tauri_features = HashSet::from_iter(config.app.features().into_iter().map(|f| f.to_string()));
 
 	dependencies.push(DependencyAllowlist {
-		name:"tauri".into(),
-		kind:DependencyKind::Normal,
-		all_cli_managed_features:crate::helpers::config::AppConfig::all_features()
+		name: "tauri".into(),
+		kind: DependencyKind::Normal,
+		all_cli_managed_features: crate::helpers::config::AppConfig::all_features()
 			.into_iter()
 			.filter(|f| f != &"tray-icon")
 			.collect(),
-		features:tauri_features,
+		features: tauri_features,
 	});
 
 	let persist = inject_features(&mut manifest, &mut dependencies)?;
@@ -332,16 +322,16 @@ pub fn rewrite_manifest(config:&Config) -> crate::Result<(Manifest, bool)> {
 	let new_manifest_str = serialize_manifest(&manifest);
 
 	if persist && original_manifest_str != new_manifest_str {
-		let mut manifest_file = File::create(&manifest_path)
-			.with_context(|| "failed to open Cargo.toml for rewrite")?;
+		let mut manifest_file =
+			File::create(&manifest_path).with_context(|| "failed to open Cargo.toml for rewrite")?;
 
 		manifest_file.write_all(new_manifest_str.as_bytes())?;
 
 		manifest_file.flush()?;
 
-		Ok((Manifest { inner:manifest, tauri_features }, true))
+		Ok((Manifest { inner: manifest, tauri_features }, true))
 	} else {
-		Ok((Manifest { inner:manifest, tauri_features }, false))
+		Ok((Manifest { inner: manifest, tauri_features }, false))
 	}
 }
 
@@ -351,7 +341,7 @@ mod tests {
 
 	use super::{DependencyAllowlist, DependencyKind};
 
-	fn inject_features(toml:&str, mut dependencies:Vec<DependencyAllowlist>) {
+	fn inject_features(toml: &str, mut dependencies: Vec<DependencyAllowlist>) {
 		let mut manifest = toml.parse::<toml_edit::DocumentMut>().expect("invalid toml");
 
 		let mut expected = HashMap::new();
@@ -385,8 +375,7 @@ mod tests {
 			expected.insert(dep.name.clone(), features);
 		}
 
-		super::inject_features(&mut manifest, &mut dependencies)
-			.expect("failed to migrate manifest");
+		super::inject_features(&mut manifest, &mut dependencies).expect("failed to migrate manifest");
 
 		for dep in dependencies {
 			let expected_features = expected.get(&dep.name).unwrap();
@@ -425,20 +414,20 @@ mod tests {
 		}
 	}
 
-	fn tauri_dependency(features:HashSet<String>) -> DependencyAllowlist {
+	fn tauri_dependency(features: HashSet<String>) -> DependencyAllowlist {
 		DependencyAllowlist {
-			name:"tauri".into(),
-			kind:DependencyKind::Normal,
-			all_cli_managed_features:vec!["isolation"],
+			name: "tauri".into(),
+			kind: DependencyKind::Normal,
+			all_cli_managed_features: vec!["isolation"],
 			features,
 		}
 	}
 
-	fn tauri_build_dependency(features:HashSet<String>) -> DependencyAllowlist {
+	fn tauri_build_dependency(features: HashSet<String>) -> DependencyAllowlist {
 		DependencyAllowlist {
-			name:"tauri-build".into(),
-			kind:DependencyKind::Build,
-			all_cli_managed_features:crate::helpers::config::AppConfig::all_features(),
+			name: "tauri-build".into(),
+			kind: DependencyKind::Build,
+			all_cli_managed_features: crate::helpers::config::AppConfig::all_features(),
 			features,
 		}
 	}
@@ -498,10 +487,7 @@ mod tests {
     features = ["config-toml", "codegen", "isolation"]
 "#,
 			vec![
-				tauri_dependency(HashSet::from_iter(vec![
-					"isolation".into(),
-					"native-tls-vendored".into(),
-				])),
+				tauri_dependency(HashSet::from_iter(vec!["isolation".into(), "native-tls-vendored".into()])),
 				tauri_build_dependency(HashSet::from_iter(vec!["isolation".into()])),
 			],
 		);
@@ -518,10 +504,7 @@ mod tests {
     tauri-build = "1"
 "#,
 			vec![
-				tauri_dependency(HashSet::from_iter(vec![
-					"isolation".into(),
-					"native-tls-vendored".into(),
-				])),
+				tauri_dependency(HashSet::from_iter(vec!["isolation".into(), "native-tls-vendored".into()])),
 				tauri_build_dependency(HashSet::from_iter(vec!["isolation".into()])),
 			],
 		);

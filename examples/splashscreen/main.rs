@@ -7,7 +7,7 @@
 use tauri::{AppHandle, Manager};
 
 #[tauri::command]
-fn close_splashscreen(app:AppHandle) {
+fn close_splashscreen(app: AppHandle) {
 	// Close splashscreen
 	app.get_webview_window("splashscreen").unwrap().close().unwrap();
 	// Show main window

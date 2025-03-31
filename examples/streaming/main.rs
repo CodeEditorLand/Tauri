@@ -13,9 +13,7 @@ use std::{
 use http::{header::*, response::Builder as ResponseBuilder, status::StatusCode};
 use http_range::HttpRange;
 
-fn get_stream_response(
-	request:http::Request<Vec<u8>>,
-) -> Result<http::Response<Vec<u8>>, Box<dyn std::error::Error>> {
+fn get_stream_response(request: http::Request<Vec<u8>>) -> Result<http::Response<Vec<u8>>, Box<dyn std::error::Error>> {
 	// skip leading `/`
 	let path = percent_encoding::percent_decode(request.uri().path()[1..].as_bytes())
 		.decode_utf8_lossy()
@@ -62,7 +60,7 @@ fn get_stream_response(
 		};
 
 		/// The Maximum bytes we send in one range
-		const MAX_LEN:u64 = 1000 * 1024;
+		const MAX_LEN: u64 = 1000 * 1024;
 
 		if ranges.len() == 1 {
 			let &(start, mut end) = ranges.first().unwrap();
@@ -125,9 +123,7 @@ fn get_stream_response(
 				// write the needed headers `Content-Type` and `Content-Range`
 				buf.write_all(format!("{CONTENT_TYPE}: video/mp4\r\n").as_bytes())?;
 
-				buf.write_all(
-					format!("{CONTENT_RANGE}: bytes {start}-{end}/{len}\r\n").as_bytes(),
-				)?;
+				buf.write_all(format!("{CONTENT_RANGE}: bytes {start}-{end}/{len}\r\n").as_bytes())?;
 
 				// write the separator to indicate the start of the range body
 				buf.write_all("\r\n".as_bytes())?;
@@ -173,8 +169,7 @@ fn random_boundary() -> String {
 fn download_video() {
 	let video_file = PathBuf::from("streaming_example_test_video.mp4");
 	if !video_file.exists() {
-		let video_url =
-			"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+		let video_url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 		// Downloading with curl this saves us from adding
 		// a Rust HTTP client dependency.
@@ -200,19 +195,17 @@ fn main() {
 	download_video();
 
 	tauri::Builder::default()
-		.register_asynchronous_uri_scheme_protocol("stream", move |_ctx, request, responder| {
-			match get_stream_response(request) {
-				Ok(http_response) => responder.respond(http_response),
-				Err(e) => {
-					responder.respond(
-						ResponseBuilder::new()
-							.status(StatusCode::INTERNAL_SERVER_ERROR)
-							.header(CONTENT_TYPE, "text/plain")
-							.body(e.to_string().as_bytes().to_vec())
-							.unwrap(),
-					)
-				},
-			}
+		.register_asynchronous_uri_scheme_protocol("stream", move |_ctx, request, responder| match get_stream_response(
+			request,
+		) {
+			Ok(http_response) => responder.respond(http_response),
+			Err(e) => responder.respond(
+				ResponseBuilder::new()
+					.status(StatusCode::INTERNAL_SERVER_ERROR)
+					.header(CONTENT_TYPE, "text/plain")
+					.body(e.to_string().as_bytes().to_vec())
+					.unwrap(),
+			),
 		})
 		.run(tauri::generate_context!("../../examples/streaming/tauri.conf.json"))
 		.expect("error while running tauri application");

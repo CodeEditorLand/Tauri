@@ -11,19 +11,16 @@ use std::{
 use sha2::Digest;
 use zip::ZipArchive;
 
-pub const WEBVIEW2_BOOTSTRAPPER_URL:&str = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
-pub const WEBVIEW2_OFFLINE_INSTALLER_X86_URL:&str =
-	"https://go.microsoft.com/fwlink/?linkid=2099617";
-pub const WEBVIEW2_OFFLINE_INSTALLER_X64_URL:&str =
-	"https://go.microsoft.com/fwlink/?linkid=2124701";
-pub const WEBVIEW2_URL_PREFIX:&str =
-	"https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/";
-pub const NSIS_OUTPUT_FOLDER_NAME:&str = "nsis";
-pub const NSIS_UPDATER_OUTPUT_FOLDER_NAME:&str = "nsis-updater";
-pub const WIX_OUTPUT_FOLDER_NAME:&str = "msi";
-pub const WIX_UPDATER_OUTPUT_FOLDER_NAME:&str = "msi-updater";
+pub const WEBVIEW2_BOOTSTRAPPER_URL: &str = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
+pub const WEBVIEW2_OFFLINE_INSTALLER_X86_URL: &str = "https://go.microsoft.com/fwlink/?linkid=2099617";
+pub const WEBVIEW2_OFFLINE_INSTALLER_X64_URL: &str = "https://go.microsoft.com/fwlink/?linkid=2124701";
+pub const WEBVIEW2_URL_PREFIX: &str = "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/";
+pub const NSIS_OUTPUT_FOLDER_NAME: &str = "nsis";
+pub const NSIS_UPDATER_OUTPUT_FOLDER_NAME: &str = "nsis-updater";
+pub const WIX_OUTPUT_FOLDER_NAME: &str = "msi";
+pub const WIX_UPDATER_OUTPUT_FOLDER_NAME: &str = "msi-updater";
 
-pub fn webview2_guid_path(url:&str) -> crate::Result<(String, String)> {
+pub fn webview2_guid_path(url: &str) -> crate::Result<(String, String)> {
 	let agent = ureq::AgentBuilder::new().try_proxy_from_env(true).build();
 
 	let response = agent.head(url).call().map_err(Box::new)?;
@@ -48,7 +45,7 @@ pub fn webview2_guid_path(url:&str) -> crate::Result<(String, String)> {
 	Ok((guid.into(), filename.into()))
 }
 
-pub fn download_webview2_bootstrapper(base_path:&Path) -> crate::Result<PathBuf> {
+pub fn download_webview2_bootstrapper(base_path: &Path) -> crate::Result<PathBuf> {
 	let file_path = base_path.join("MicrosoftEdgeWebview2Setup.exe");
 
 	if !file_path.exists() {
@@ -58,7 +55,7 @@ pub fn download_webview2_bootstrapper(base_path:&Path) -> crate::Result<PathBuf>
 	Ok(file_path)
 }
 
-pub fn download_webview2_offline_installer(base_path:&Path, arch:&str) -> crate::Result<PathBuf> {
+pub fn download_webview2_offline_installer(base_path: &Path, arch: &str) -> crate::Result<PathBuf> {
 	let url = if arch == "x64" {
 		WEBVIEW2_OFFLINE_INSTALLER_X64_URL
 	} else {
@@ -80,7 +77,7 @@ pub fn download_webview2_offline_installer(base_path:&Path, arch:&str) -> crate:
 	Ok(file_path)
 }
 
-pub fn download(url:&str) -> crate::Result<Vec<u8>> {
+pub fn download(url: &str) -> crate::Result<Vec<u8>> {
 	log::info!(action = "Downloading"; "{}", url);
 
 	let agent = ureq::AgentBuilder::new().try_proxy_from_env(true).build();
@@ -102,11 +99,7 @@ pub enum HashAlgorithm {
 }
 
 /// Function used to download a file and checks SHA256 to verify the download.
-pub fn download_and_verify(
-	url:&str,
-	hash:&str,
-	hash_algorithm:HashAlgorithm,
-) -> crate::Result<Vec<u8>> {
+pub fn download_and_verify(url: &str, hash: &str, hash_algorithm: HashAlgorithm) -> crate::Result<Vec<u8>> {
 	let data = download(url)?;
 
 	log::info!("validating hash");
@@ -116,7 +109,7 @@ pub fn download_and_verify(
 	Ok(data)
 }
 
-pub fn verify_hash(data:&[u8], hash:&str, hash_algorithm:HashAlgorithm) -> crate::Result<()> {
+pub fn verify_hash(data: &[u8], hash: &str, hash_algorithm: HashAlgorithm) -> crate::Result<()> {
 	match hash_algorithm {
 		#[cfg(target_os = "windows")]
 		HashAlgorithm::Sha256 => {
@@ -132,7 +125,7 @@ pub fn verify_hash(data:&[u8], hash:&str, hash_algorithm:HashAlgorithm) -> crate
 	}
 }
 
-fn verify_data_with_hasher(data:&[u8], hash:&str, mut hasher:impl Digest) -> crate::Result<()> {
+fn verify_data_with_hasher(data: &[u8], hash: &str, mut hasher: impl Digest) -> crate::Result<()> {
 	hasher.update(data);
 
 	let url_hash = hasher.finalize().to_vec();
@@ -142,11 +135,7 @@ fn verify_data_with_hasher(data:&[u8], hash:&str, mut hasher:impl Digest) -> cra
 	if expected_hash == url_hash { Ok(()) } else { Err(crate::Error::HashError) }
 }
 
-pub fn verify_file_hash<P:AsRef<Path>>(
-	path:P,
-	hash:&str,
-	hash_algorithm:HashAlgorithm,
-) -> crate::Result<()> {
+pub fn verify_file_hash<P: AsRef<Path>>(path: P, hash: &str, hash_algorithm: HashAlgorithm) -> crate::Result<()> {
 	let data = std::fs::read(path)?;
 
 	verify_hash(&data, hash, hash_algorithm)
@@ -154,7 +143,7 @@ pub fn verify_file_hash<P:AsRef<Path>>(
 
 /// Extracts the zips from memory into a usable path.
 #[allow(dead_code)]
-pub fn extract_zip(data:&[u8], path:&Path) -> crate::Result<()> {
+pub fn extract_zip(data: &[u8], path: &Path) -> crate::Result<()> {
 	let cursor = Cursor::new(data);
 
 	let mut zipa = ZipArchive::new(cursor)?;
@@ -177,7 +166,7 @@ pub fn extract_zip(data:&[u8], path:&Path) -> crate::Result<()> {
 				create_dir_all(parent)?;
 			}
 
-			let mut buff:Vec<u8> = Vec::new();
+			let mut buff: Vec<u8> = Vec::new();
 
 			file.read_to_end(&mut buff)?;
 
@@ -193,13 +182,10 @@ pub fn extract_zip(data:&[u8], path:&Path) -> crate::Result<()> {
 #[cfg(target_os = "windows")]
 pub fn os_bitness<'a>() -> Option<&'a str> {
 	use windows_sys::Win32::System::SystemInformation::{
-		GetNativeSystemInfo,
-		PROCESSOR_ARCHITECTURE_AMD64,
-		PROCESSOR_ARCHITECTURE_INTEL,
-		SYSTEM_INFO,
+		GetNativeSystemInfo, PROCESSOR_ARCHITECTURE_AMD64, PROCESSOR_ARCHITECTURE_INTEL, SYSTEM_INFO,
 	};
 
-	let mut system_info:SYSTEM_INFO = unsafe { std::mem::zeroed() };
+	let mut system_info: SYSTEM_INFO = unsafe { std::mem::zeroed() };
 
 	unsafe { GetNativeSystemInfo(&mut system_info) };
 

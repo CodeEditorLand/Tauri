@@ -40,7 +40,7 @@ use crate::Settings;
 
 /// Bundles the project.
 /// Returns a vector of PathBuf that shows where the DEB was created.
-pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
+pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
 	let arch = match settings.binary_arch() {
 		"x86" => "i386",
 		"x86_64" => "amd64",
@@ -51,8 +51,7 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 		other => other,
 	};
 
-	let package_base_name =
-		format!("{}_{}_{}", settings.product_name(), settings.version_string(), arch);
+	let package_base_name = format!("{}_{}_{}", settings.product_name(), settings.version_string(), arch);
 
 	let package_name = format!("{package_base_name}.deb");
 
@@ -61,25 +60,22 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	let package_dir = base_dir.join(&package_base_name);
 
 	if package_dir.exists() {
-		fs::remove_dir_all(&package_dir)
-			.with_context(|| format!("Failed to remove old {package_base_name}"))?;
+		fs::remove_dir_all(&package_dir).with_context(|| format!("Failed to remove old {package_base_name}"))?;
 	}
 
 	let package_path = base_dir.join(&package_name);
 
 	log::info!(action = "Bundling"; "{} ({})", package_name, package_path.display());
 
-	let (data_dir, _) = generate_data(settings, &package_dir)
-		.with_context(|| "Failed to build data folders and files")?;
+	let (data_dir, _) =
+		generate_data(settings, &package_dir).with_context(|| "Failed to build data folders and files")?;
 
-	common::copy_custom_files(&settings.deb().files, &data_dir)
-		.with_context(|| "Failed to copy custom files")?;
+	common::copy_custom_files(&settings.deb().files, &data_dir).with_context(|| "Failed to copy custom files")?;
 
 	// Generate control files.
 	let control_dir = package_dir.join("control");
 
-	generate_control_file(settings, arch, &control_dir, &data_dir)
-		.with_context(|| "Failed to create control file")?;
+	generate_control_file(settings, arch, &control_dir, &data_dir).with_context(|| "Failed to create control file")?;
 
 	generate_scripts(settings, &control_dir).with_context(|| "Failed to create control scripts")?;
 
@@ -89,15 +85,12 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	// http://www.tldp.org/HOWTO/Debian-Binary-Package-Building-HOWTO/x60.html#AEN66
 	let debian_binary_path = package_dir.join("debian-binary");
 
-	create_file_with_data(&debian_binary_path, "2.0\n")
-		.with_context(|| "Failed to create debian-binary file")?;
+	create_file_with_data(&debian_binary_path, "2.0\n").with_context(|| "Failed to create debian-binary file")?;
 
 	// Apply tar/gzip/ar to create the final package file.
-	let control_tar_gz_path =
-		tar_and_gzip_dir(control_dir).with_context(|| "Failed to tar/gzip control directory")?;
+	let control_tar_gz_path = tar_and_gzip_dir(control_dir).with_context(|| "Failed to tar/gzip control directory")?;
 
-	let data_tar_gz_path =
-		tar_and_gzip_dir(data_dir).with_context(|| "Failed to tar/gzip data directory")?;
+	let data_tar_gz_path = tar_and_gzip_dir(data_dir).with_context(|| "Failed to tar/gzip data directory")?;
 
 	create_archive(vec![debian_binary_path, control_tar_gz_path, data_tar_gz_path], &package_path)
 		.with_context(|| "Failed to create package archive")?;
@@ -106,10 +99,7 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 }
 
 /// Generate the debian data folders and files.
-pub fn generate_data(
-	settings:&Settings,
-	package_dir:&Path,
-) -> crate::Result<(PathBuf, Vec<freedesktop::Icon>)> {
+pub fn generate_data(settings: &Settings, package_dir: &Path) -> crate::Result<(PathBuf, Vec<freedesktop::Icon>)> {
 	// Generate data files.
 	let data_dir = package_dir.join("data");
 
@@ -128,21 +118,19 @@ pub fn generate_data(
 		.copy_binaries(&bin_dir)
 		.with_context(|| "Failed to copy external binaries")?;
 
-	let icons = freedesktop::copy_icon_files(settings, &data_dir)
-		.with_context(|| "Failed to create icon files")?;
+	let icons = freedesktop::copy_icon_files(settings, &data_dir).with_context(|| "Failed to create icon files")?;
 
 	freedesktop::generate_desktop_file(settings, &settings.deb().desktop_template, &data_dir)
 		.with_context(|| "Failed to create desktop file")?;
 
-	generate_changelog_file(settings, &data_dir)
-		.with_context(|| "Failed to create changelog.gz file")?;
+	generate_changelog_file(settings, &data_dir).with_context(|| "Failed to create changelog.gz file")?;
 
 	Ok((data_dir, icons))
 }
 
 /// Generate the Changelog file by compressing, to be stored at
 /// /usr/share/doc/package-name/changelog.gz. See <https://www.debian.org/doc/debian-policy/ch-docs.html#changelog-files-and-release-notes>
-fn generate_changelog_file(settings:&Settings, data_dir:&Path) -> crate::Result<()> {
+fn generate_changelog_file(settings: &Settings, data_dir: &Path) -> crate::Result<()> {
 	if let Some(changelog_src_path) = &settings.deb().changelog {
 		let mut src_file = File::open(changelog_src_path)?;
 
@@ -165,12 +153,7 @@ fn generate_changelog_file(settings:&Settings, data_dir:&Path) -> crate::Result<
 }
 
 /// Generates the debian control file and stores it under the `control_dir`.
-fn generate_control_file(
-	settings:&Settings,
-	arch:&str,
-	control_dir:&Path,
-	data_dir:&Path,
-) -> crate::Result<()> {
+fn generate_control_file(settings: &Settings, arch: &str, control_dir: &Path, data_dir: &Path) -> crate::Result<()> {
 	// For more information about the format of this file, see
 	// https://www.debian.org/doc/debian-policy/ch-controlfields.html
 	let dest_path = control_dir.join("control");
@@ -268,7 +251,7 @@ fn generate_control_file(
 	Ok(())
 }
 
-fn generate_scripts(settings:&Settings, control_dir:&Path) -> crate::Result<()> {
+fn generate_scripts(settings: &Settings, control_dir: &Path) -> crate::Result<()> {
 	if let Some(script_path) = &settings.deb().pre_install_script {
 		let dest_path = control_dir.join("preinst");
 
@@ -296,7 +279,7 @@ fn generate_scripts(settings:&Settings, control_dir:&Path) -> crate::Result<()> 
 	Ok(())
 }
 
-fn create_script_file_from_path(from:&PathBuf, to:&PathBuf) -> crate::Result<()> {
+fn create_script_file_from_path(from: &PathBuf, to: &PathBuf) -> crate::Result<()> {
 	let mut from = File::open(from)?;
 
 	let mut file = OpenOptions::new()
@@ -313,7 +296,7 @@ fn create_script_file_from_path(from:&PathBuf, to:&PathBuf) -> crate::Result<()>
 
 /// Create an `md5sums` file in the `control_dir` containing the MD5 checksums
 /// for each file within the `data_dir`.
-fn generate_md5sums(control_dir:&Path, data_dir:&Path) -> crate::Result<()> {
+fn generate_md5sums(control_dir: &Path, data_dir: &Path) -> crate::Result<()> {
 	let md5sums_path = control_dir.join("md5sums");
 
 	let mut md5sums_file = common::create_file(&md5sums_path)?;
@@ -353,7 +336,7 @@ fn generate_md5sums(control_dir:&Path, data_dir:&Path) -> crate::Result<()> {
 
 /// Copy the bundle's resource files into an appropriate directory under the
 /// `data_dir`.
-fn copy_resource_files(settings:&Settings, data_dir:&Path) -> crate::Result<()> {
+fn copy_resource_files(settings: &Settings, data_dir: &Path) -> crate::Result<()> {
 	let resource_dir = data_dir.join("usr/lib").join(settings.main_binary_name());
 
 	settings.copy_resources(&resource_dir)
@@ -361,7 +344,7 @@ fn copy_resource_files(settings:&Settings, data_dir:&Path) -> crate::Result<()> 
 
 /// Create an empty file at the given path, creating any parent directories as
 /// needed, then write `data` into the file.
-fn create_file_with_data<P:AsRef<Path>>(path:P, data:&str) -> crate::Result<()> {
+fn create_file_with_data<P: AsRef<Path>>(path: P, data: &str) -> crate::Result<()> {
 	let mut file = common::create_file(path.as_ref())?;
 
 	file.write_all(data.as_bytes())?;
@@ -373,8 +356,8 @@ fn create_file_with_data<P:AsRef<Path>>(path:P, data:&str) -> crate::Result<()> 
 
 /// Computes the total size, in bytes, of the given directory and all of its
 /// contents.
-fn total_dir_size(dir:&Path) -> crate::Result<u64> {
-	let mut total:u64 = 0;
+fn total_dir_size(dir: &Path) -> crate::Result<u64> {
+	let mut total: u64 = 0;
 
 	for entry in WalkDir::new(dir) {
 		total += entry?.metadata()?.len();
@@ -384,7 +367,7 @@ fn total_dir_size(dir:&Path) -> crate::Result<u64> {
 }
 
 /// Writes a tar file to the given writer containing the given directory.
-fn create_tar_from_dir<P:AsRef<Path>, W:Write>(src_dir:P, dest_file:W) -> crate::Result<W> {
+fn create_tar_from_dir<P: AsRef<Path>, W: Write>(src_dir: P, dest_file: W) -> crate::Result<W> {
 	let src_dir = src_dir.as_ref();
 
 	let mut tar_builder = tar::Builder::new(dest_file);
@@ -425,7 +408,7 @@ fn create_tar_from_dir<P:AsRef<Path>, W:Write>(src_dir:P, dest_file:W) -> crate:
 /// Creates a `.tar.gz` file from the given directory (placing the new file
 /// within the given directory's parent directory), then deletes the original
 /// directory and returns the path to the new file.
-fn tar_and_gzip_dir<P:AsRef<Path>>(src_dir:P) -> crate::Result<PathBuf> {
+fn tar_and_gzip_dir<P: AsRef<Path>>(src_dir: P) -> crate::Result<PathBuf> {
 	let src_dir = src_dir.as_ref();
 
 	let dest_path = src_dir.with_extension("tar.gz");
@@ -445,7 +428,7 @@ fn tar_and_gzip_dir<P:AsRef<Path>>(src_dir:P) -> crate::Result<PathBuf> {
 
 /// Creates an `ar` archive from the given source files and writes it to the
 /// given destination path.
-fn create_archive(srcs:Vec<PathBuf>, dest:&Path) -> crate::Result<()> {
+fn create_archive(srcs: Vec<PathBuf>, dest: &Path) -> crate::Result<()> {
 	let mut builder = ar::Builder::new(common::create_file(dest)?);
 
 	for path in &srcs {

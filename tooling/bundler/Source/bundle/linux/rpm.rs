@@ -17,7 +17,7 @@ use crate::Settings;
 
 /// Bundles the project.
 /// Returns a vector of PathBuf that shows where the RPM was created.
-pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
+pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
 	let product_name = settings.product_name();
 
 	let version = settings.version_string();
@@ -43,8 +43,7 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	let package_dir = base_dir.join(&package_base_name);
 
 	if package_dir.exists() {
-		fs::remove_dir_all(&package_dir)
-			.with_context(|| format!("Failed to remove old {package_base_name}"))?;
+		fs::remove_dir_all(&package_dir).with_context(|| format!("Failed to remove old {package_base_name}"))?;
 	}
 
 	fs::create_dir_all(&package_dir)?;
@@ -150,8 +149,7 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 		// Then add the resource directory `/usr/lib/<binary_name>` to the package.
 		builder = builder.with_file(
 			empty_file_path,
-			FileOptions::new(resource_dir.to_string_lossy())
-				.mode(FileMode::Dir { permissions:0o755 }),
+			FileOptions::new(resource_dir.to_string_lossy()).mode(FileMode::Dir { permissions: 0o755 }),
 		)?;
 		// Then add the resources files in that directory
 		for src in settings.resource_files() {
@@ -164,14 +162,10 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	}
 
 	// Add Desktop entry file
-	let (desktop_src_path, desktop_dest_path) = freedesktop::generate_desktop_file(
-		settings,
-		&settings.rpm().desktop_template,
-		&package_dir,
-	)?;
+	let (desktop_src_path, desktop_dest_path) =
+		freedesktop::generate_desktop_file(settings, &settings.rpm().desktop_template, &package_dir)?;
 
-	builder = builder
-		.with_file(desktop_src_path, FileOptions::new(desktop_dest_path.to_string_lossy()))?;
+	builder = builder.with_file(desktop_src_path, FileOptions::new(desktop_dest_path.to_string_lossy()))?;
 
 	// Add icons
 	for (icon, src) in &freedesktop::list_icon_files(settings, &PathBuf::from("/"))? {
@@ -189,8 +183,7 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 				if entry_path.is_file() {
 					let dest_path = rpm_path.join(entry_path.strip_prefix(src_path).unwrap());
 
-					builder = builder
-						.with_file(&entry_path, FileOptions::new(dest_path.to_string_lossy()))?;
+					builder = builder.with_file(&entry_path, FileOptions::new(dest_path.to_string_lossy()))?;
 				}
 			}
 		}

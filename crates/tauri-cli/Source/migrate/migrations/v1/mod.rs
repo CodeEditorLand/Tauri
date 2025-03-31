@@ -26,11 +26,11 @@ pub fn run() -> Result<()> {
 	// Add plugins
 	for plugin in migrated.plugins {
 		crate::add::run(crate::add::Options {
-			plugin:plugin.clone(),
-			branch:None,
-			tag:None,
-			rev:None,
-			no_fmt:false,
+			plugin: plugin.clone(),
+			branch: None,
+			tag: None,
+			rev: None,
+			no_fmt: false,
 		})
 		.with_context(|| format!("Could not migrate plugin '{plugin}'"))?;
 	}

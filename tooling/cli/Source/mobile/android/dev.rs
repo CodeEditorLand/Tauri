@@ -18,20 +18,11 @@ use cargo_mobile2::{
 use clap::{ArgAction, Parser};
 
 use super::{
-	MobileTarget,
-	configure_cargo,
-	delete_codegen_vars,
-	device_prompt,
-	ensure_init,
-	env,
-	get_app,
-	get_config,
-	inject_resources,
-	open_and_wait,
+	MobileTarget, configure_cargo, delete_codegen_vars, device_prompt, ensure_init, env, get_app, get_config,
+	inject_resources, open_and_wait,
 };
 use crate::{
-	ConfigValue,
-	Result,
+	ConfigValue, Result,
 	dev::Options as DevOptions,
 	helpers::{
 		app_paths::tauri_dir,
@@ -53,57 +44,57 @@ use crate::{
 pub struct Options {
 	/// List of cargo features to activate
 	#[clap(short, long, action = ArgAction::Append, num_args(0..))]
-	pub features:Option<Vec<String>>,
+	pub features: Option<Vec<String>>,
 	/// Exit on panic
 	#[clap(short, long)]
-	exit_on_panic:bool,
+	exit_on_panic: bool,
 	/// JSON string or path to JSON file to merge with tauri.conf.json
 	#[clap(short, long)]
-	pub config:Option<ConfigValue>,
+	pub config: Option<ConfigValue>,
 	/// Run the code in release mode
 	#[clap(long = "release")]
-	pub release_mode:bool,
+	pub release_mode: bool,
 	/// Skip waiting for the frontend dev server to start before building the
 	/// tauri application.
 	#[clap(long, env = "TAURI_CLI_NO_DEV_SERVER_WAIT")]
-	pub no_dev_server_wait:bool,
+	pub no_dev_server_wait: bool,
 	/// Disable the file watcher
 	#[clap(long)]
-	pub no_watch:bool,
+	pub no_watch: bool,
 	/// Open Android Studio instead of trying to run on a connected device
 	#[clap(short, long)]
-	pub open:bool,
+	pub open: bool,
 	/// Runs on the given device name
-	pub device:Option<String>,
+	pub device: Option<String>,
 	/// Disable the built-in dev server for static files.
 	#[clap(long)]
-	pub no_dev_server:bool,
+	pub no_dev_server: bool,
 	/// Specify port for the built-in dev server for static files. Defaults to
 	/// 1430.
 	#[clap(long, env = "TAURI_CLI_PORT")]
-	pub port:Option<u16>,
+	pub port: Option<u16>,
 }
 
 impl From<Options> for DevOptions {
-	fn from(options:Options) -> Self {
+	fn from(options: Options) -> Self {
 		Self {
-			runner:None,
-			target:None,
-			features:options.features,
-			exit_on_panic:options.exit_on_panic,
-			config:options.config,
-			args:Vec::new(),
-			no_watch:options.no_watch,
-			no_dev_server_wait:options.no_dev_server_wait,
-			no_dev_server:options.no_dev_server,
-			port:options.port,
-			release_mode:options.release_mode,
-			host:None,
+			runner: None,
+			target: None,
+			features: options.features,
+			exit_on_panic: options.exit_on_panic,
+			config: options.config,
+			args: Vec::new(),
+			no_watch: options.no_watch,
+			no_dev_server_wait: options.no_dev_server_wait,
+			no_dev_server: options.no_dev_server,
+			port: options.port,
+			release_mode: options.release_mode,
+			host: None,
 		}
 	}
 }
 
-pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
+pub fn command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 	crate::helpers::app_paths::resolve();
 
 	let result = run_command(options, noise_level);
@@ -115,13 +106,10 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 	result
 }
 
-fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
+fn run_command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 	delete_codegen_vars();
 
-	let tauri_config = get_tauri_config(
-		tauri_utils::platform::Target::Android,
-		options.config.as_ref().map(|c| &c.0),
-	)?;
+	let tauri_config = get_tauri_config(tauri_utils::platform::Target::Android, options.config.as_ref().map(|c| &c.0))?;
 
 	let env = env()?;
 
@@ -138,7 +126,7 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 		}
 	};
 
-	let mut dev_options:DevOptions = options.clone().into();
+	let mut dev_options: DevOptions = options.clone().into();
 
 	let target_triple = device
 		.as_ref()
@@ -156,8 +144,7 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 		let app = get_app(MobileTarget::Android, tauri_config_, &interface);
 
-		let (config, metadata) =
-			get_config(&app, tauri_config_, dev_options.features.as_ref(), &Default::default());
+		let (config, metadata) = get_config(&app, tauri_config_, dev_options.features.as_ref(), &Default::default());
 		(interface, config, metadata)
 	};
 
@@ -182,21 +169,21 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 #[allow(clippy::too_many_arguments)]
 fn run_dev(
-	mut interface:AppInterface,
-	options:Options,
-	mut dev_options:DevOptions,
-	tauri_config:ConfigHandle,
-	device:Option<Device>,
-	mut env:Env,
-	config:&AndroidConfig,
-	metadata:&AndroidMetadata,
-	noise_level:NoiseLevel,
+	mut interface: AppInterface,
+	options: Options,
+	mut dev_options: DevOptions,
+	tauri_config: ConfigHandle,
+	device: Option<Device>,
+	mut env: Env,
+	config: &AndroidConfig,
+	metadata: &AndroidMetadata,
+	noise_level: NoiseLevel,
 ) -> Result<()> {
 	crate::dev::setup(&interface, &mut dev_options, tauri_config.clone())?;
 
 	let interface_options = InterfaceOptions {
-		debug:!dev_options.release_mode,
-		target:dev_options.target.clone(),
+		debug: !dev_options.release_mode,
+		target: dev_options.target.clone(),
 		..Default::default()
 	};
 
@@ -231,29 +218,26 @@ fn run_dev(
 
 	interface.mobile_dev(
 		MobileOptions {
-			debug:!options.release_mode,
-			features:options.features,
-			args:Vec::new(),
-			config:dev_options.config.clone(),
-			no_watch:options.no_watch,
+			debug: !options.release_mode,
+			features: options.features,
+			args: Vec::new(),
+			config: dev_options.config.clone(),
+			no_watch: options.no_watch,
 		},
 		|options| {
 			let cli_options = CliOptions {
-				dev:true,
-				features:options.features.clone(),
-				args:options.args.clone(),
+				dev: true,
+				features: options.features.clone(),
+				args: options.args.clone(),
 				noise_level,
-				vars:Default::default(),
-				config:dev_options.config.clone(),
-				target_device:device.as_ref().map(|d| {
-					TargetDevice { id:d.serial_no().to_string(), name:d.name().to_string() }
-				}),
+				vars: Default::default(),
+				config: dev_options.config.clone(),
+				target_device: device
+					.as_ref()
+					.map(|d| TargetDevice { id: d.serial_no().to_string(), name: d.name().to_string() }),
 			};
 
-			let _handle = write_options(
-				&tauri_config.lock().unwrap().as_ref().unwrap().identifier,
-				cli_options,
-			)?;
+			let _handle = write_options(&tauri_config.lock().unwrap().as_ref().unwrap().identifier, cli_options)?;
 
 			inject_resources(config, tauri_config.lock().unwrap().as_ref().unwrap())?;
 
@@ -276,12 +260,12 @@ fn run_dev(
 }
 
 fn run(
-	device:&Device<'_>,
-	options:MobileOptions,
-	config:&AndroidConfig,
-	env:&Env,
-	metadata:&AndroidMetadata,
-	noise_level:NoiseLevel,
+	device: &Device<'_>,
+	options: MobileOptions,
+	config: &AndroidConfig,
+	env: &Env,
+	metadata: &AndroidMetadata,
+	noise_level: NoiseLevel,
 ) -> crate::Result<DevChild> {
 	let profile = if options.debug { Profile::Debug } else { Profile::Release };
 

@@ -20,22 +20,11 @@ use cargo_mobile2::{
 use clap::{ArgAction, Parser};
 
 use super::{
-	MobileTarget,
-	ProjectConfig,
-	device_prompt,
-	ensure_init,
-	env,
-	get_app,
-	get_config,
-	inject_resources,
-	load_pbxproj,
-	merge_plist,
-	open_and_wait,
-	synchronize_project_config,
+	MobileTarget, ProjectConfig, device_prompt, ensure_init, env, get_app, get_config, inject_resources, load_pbxproj,
+	merge_plist, open_and_wait, synchronize_project_config,
 };
 use crate::{
-	ConfigValue,
-	Result,
+	ConfigValue, Result,
 	dev::Options as DevOptions,
 	helpers::{
 		app_paths::tauri_dir,
@@ -64,31 +53,31 @@ environment variable to determine whether the public network should be used or n
 pub struct Options {
 	/// List of cargo features to activate
 	#[clap(short, long, action = ArgAction::Append, num_args(0..))]
-	pub features:Option<Vec<String>>,
+	pub features: Option<Vec<String>>,
 	/// Exit on panic
 	#[clap(short, long)]
-	exit_on_panic:bool,
+	exit_on_panic: bool,
 	/// JSON string or path to JSON file to merge with tauri.conf.json
 	#[clap(short, long)]
-	pub config:Option<ConfigValue>,
+	pub config: Option<ConfigValue>,
 	/// Run the code in release mode
 	#[clap(long = "release")]
-	pub release_mode:bool,
+	pub release_mode: bool,
 	/// Skip waiting for the frontend dev server to start before building the
 	/// tauri application.
 	#[clap(long, env = "TAURI_CLI_NO_DEV_SERVER_WAIT")]
-	pub no_dev_server_wait:bool,
+	pub no_dev_server_wait: bool,
 	/// Disable the file watcher
 	#[clap(long)]
-	pub no_watch:bool,
+	pub no_watch: bool,
 	/// Open Xcode instead of trying to run on a connected device
 	#[clap(short, long)]
-	pub open:bool,
+	pub open: bool,
 	/// Runs on the given device name
-	pub device:Option<String>,
+	pub device: Option<String>,
 	/// Force prompting for an IP to use to connect to the dev server on mobile.
 	#[clap(long)]
-	pub force_ip_prompt:bool,
+	pub force_ip_prompt: bool,
 	/// Use the public network address for the development server.
 	/// If an actual address it provided, it is used instead of prompting to
 	/// pick one.
@@ -105,36 +94,36 @@ pub struct Options {
 	/// framework's configuration to expose the development server
 	/// on the public network address.
 	#[clap(long)]
-	pub host:Option<Option<IpAddr>>,
+	pub host: Option<Option<IpAddr>>,
 	/// Disable the built-in dev server for static files.
 	#[clap(long)]
-	pub no_dev_server:bool,
+	pub no_dev_server: bool,
 	/// Specify port for the built-in dev server for static files. Defaults to
 	/// 1430.
 	#[clap(long, env = "TAURI_CLI_PORT")]
-	pub port:Option<u16>,
+	pub port: Option<u16>,
 }
 
 impl From<Options> for DevOptions {
-	fn from(options:Options) -> Self {
+	fn from(options: Options) -> Self {
 		Self {
-			runner:None,
-			target:None,
-			features:options.features,
-			exit_on_panic:options.exit_on_panic,
-			config:options.config,
-			release_mode:options.release_mode,
-			args:Vec::new(),
-			no_watch:options.no_watch,
-			no_dev_server:options.no_dev_server,
-			no_dev_server_wait:options.no_dev_server_wait,
-			port:options.port,
-			host:None,
+			runner: None,
+			target: None,
+			features: options.features,
+			exit_on_panic: options.exit_on_panic,
+			config: options.config,
+			release_mode: options.release_mode,
+			args: Vec::new(),
+			no_watch: options.no_watch,
+			no_dev_server: options.no_dev_server,
+			no_dev_server_wait: options.no_dev_server_wait,
+			port: options.port,
+			host: None,
 		}
 	}
 }
 
-pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
+pub fn command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 	crate::helpers::app_paths::resolve();
 
 	let result = run_command(options, noise_level);
@@ -146,7 +135,7 @@ pub fn command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 	result
 }
 
-fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
+fn run_command(options: Options, noise_level: NoiseLevel) -> Result<()> {
 	let env = env()?;
 
 	let device = if options.open {
@@ -162,7 +151,7 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 		}
 	};
 
-	let mut dev_options:DevOptions = options.clone().into();
+	let mut dev_options: DevOptions = options.clone().into();
 
 	let target_triple = device
 		.as_ref()
@@ -171,10 +160,7 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 	dev_options.target = Some(target_triple.clone());
 
-	let tauri_config = get_tauri_config(
-		tauri_utils::platform::Target::Ios,
-		options.config.as_ref().map(|c| &c.0),
-	)?;
+	let tauri_config = get_tauri_config(tauri_utils::platform::Target::Ios, options.config.as_ref().map(|c| &c.0))?;
 
 	let (interface, config) = {
 		let tauri_config_guard = tauri_config.lock().unwrap();
@@ -185,8 +171,7 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 
 		let app = get_app(MobileTarget::Ios, tauri_config_, &interface);
 
-		let (config, _metadata) =
-			get_config(&app, tauri_config_, dev_options.features.as_ref(), &Default::default());
+		let (config, _metadata) = get_config(&app, tauri_config_, dev_options.features.as_ref(), &Default::default());
 
 		(interface, config)
 	};
@@ -217,7 +202,7 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 		&tauri_config,
 		&mut pbxproj,
 		&mut plist::Dictionary::new(),
-		&ProjectConfig { code_sign_identity:None, team_id:None, provisioning_profile_uuid:None },
+		&ProjectConfig { code_sign_identity: None, team_id: None, provisioning_profile_uuid: None },
 		!options.release_mode,
 	)?;
 
@@ -228,20 +213,18 @@ fn run_command(options:Options, noise_level:NoiseLevel) -> Result<()> {
 	run_dev(interface, options, dev_options, tauri_config, device, env, &config, noise_level)
 }
 
-fn local_ip_address(force:bool) -> &'static IpAddr {
-	static LOCAL_IP:OnceLock<IpAddr> = OnceLock::new();
+fn local_ip_address(force: bool) -> &'static IpAddr {
+	static LOCAL_IP: OnceLock<IpAddr> = OnceLock::new();
 
 	LOCAL_IP.get_or_init(|| {
 		let prompt_for_ip = || {
-			let addresses:Vec<IpAddr> = local_ip_address::list_afinet_netifas()
+			let addresses: Vec<IpAddr> = local_ip_address::list_afinet_netifas()
 				.expect("failed to list networks")
 				.into_iter()
 				.map(|(_, ipaddr)| ipaddr)
-				.filter(|ipaddr| {
-					match ipaddr {
-						IpAddr::V4(i) => i != &Ipv4Addr::LOCALHOST,
-						IpAddr::V6(i) => i.to_string().ends_with("::2"),
-					}
+				.filter(|ipaddr| match ipaddr {
+					IpAddr::V4(i) => i != &Ipv4Addr::LOCALHOST,
+					IpAddr::V6(i) => i.to_string().ends_with("::2"),
 				})
 				.collect();
 
@@ -252,16 +235,15 @@ fn local_ip_address(force:bool) -> &'static IpAddr {
 					*ipaddr
 				},
 				_ => {
-					let selected =
-						dialoguer::Select::with_theme(&dialoguer::theme::ColorfulTheme::default())
-							.with_prompt(
-								"Failed to detect external IP, What IP should we use to access \
+					let selected = dialoguer::Select::with_theme(&dialoguer::theme::ColorfulTheme::default())
+						.with_prompt(
+							"Failed to detect external IP, What IP should we use to access \
 								 your development server?",
-							)
-							.items(&addresses)
-							.default(0)
-							.interact()
-							.expect("failed to select external IP");
+						)
+						.items(&addresses)
+						.default(0)
+						.interact()
+						.expect("failed to select external IP");
 					*addresses.get(selected).unwrap()
 				},
 			}
@@ -280,18 +262,16 @@ fn local_ip_address(force:bool) -> &'static IpAddr {
 }
 
 fn use_network_address_for_dev_url(
-	config:&ConfigHandle,
-	options:&mut Options,
-	dev_options:&mut DevOptions,
+	config: &ConfigHandle,
+	options: &mut Options,
+	dev_options: &mut DevOptions,
 ) -> crate::Result<()> {
 	let mut dev_url = config.lock().unwrap().as_ref().unwrap().build.dev_url.clone();
 
 	let ip = if let Some(url) = &mut dev_url {
 		let localhost = match url.host() {
 			Some(url::Host::Domain(d)) => d == "localhost",
-			Some(url::Host::Ipv4(i)) => {
-				i == std::net::Ipv4Addr::LOCALHOST || i == std::net::Ipv4Addr::UNSPECIFIED
-			},
+			Some(url::Host::Ipv4(i)) => i == std::net::Ipv4Addr::LOCALHOST || i == std::net::Ipv4Addr::UNSPECIFIED,
 			_ => false,
 		};
 
@@ -366,14 +346,14 @@ fn use_network_address_for_dev_url(
 
 #[allow(clippy::too_many_arguments)]
 fn run_dev(
-	mut interface:AppInterface,
-	mut options:Options,
-	mut dev_options:DevOptions,
-	tauri_config:ConfigHandle,
-	device:Option<Device>,
-	env:Env,
-	config:&AppleConfig,
-	noise_level:NoiseLevel,
+	mut interface: AppInterface,
+	mut options: Options,
+	mut dev_options: DevOptions,
+	tauri_config: ConfigHandle,
+	device: Option<Device>,
+	env: Env,
+	config: &AppleConfig,
+	noise_level: NoiseLevel,
 ) -> Result<()> {
 	// when running on an actual device we must use the network IP
 	if options.host.is_some()
@@ -390,8 +370,8 @@ fn run_dev(
 	let app_settings = interface.app_settings();
 
 	let bin_path = app_settings.app_binary_path(&InterfaceOptions {
-		debug:!dev_options.release_mode,
-		target:dev_options.target.clone(),
+		debug: !dev_options.release_mode,
+		target: dev_options.target.clone(),
 		..Default::default()
 	})?;
 
@@ -405,27 +385,24 @@ fn run_dev(
 
 	interface.mobile_dev(
 		MobileOptions {
-			debug:true,
-			features:options.features,
-			args:Vec::new(),
-			config:dev_options.config.clone(),
-			no_watch:options.no_watch,
+			debug: true,
+			features: options.features,
+			args: Vec::new(),
+			config: dev_options.config.clone(),
+			no_watch: options.no_watch,
 		},
 		|options| {
 			let cli_options = CliOptions {
-				dev:true,
-				features:options.features.clone(),
-				args:options.args.clone(),
+				dev: true,
+				features: options.features.clone(),
+				args: options.args.clone(),
 				noise_level,
-				vars:Default::default(),
-				config:dev_options.config.clone(),
-				target_device:None,
+				vars: Default::default(),
+				config: dev_options.config.clone(),
+				target_device: None,
 			};
 
-			let _handle = write_options(
-				&tauri_config.lock().unwrap().as_ref().unwrap().identifier,
-				cli_options,
-			)?;
+			let _handle = write_options(&tauri_config.lock().unwrap().as_ref().unwrap().identifier, cli_options)?;
 
 			if open {
 				if !set_host {
@@ -453,12 +430,7 @@ fn run_dev(
 	)
 }
 
-fn run(
-	device:&Device<'_>,
-	options:MobileOptions,
-	config:&AppleConfig,
-	env:&Env,
-) -> crate::Result<DevChild> {
+fn run(device: &Device<'_>, options: MobileOptions, config: &AppleConfig, env: &Env) -> crate::Result<DevChild> {
 	let profile = if options.debug { Profile::Debug } else { Profile::Release };
 
 	device

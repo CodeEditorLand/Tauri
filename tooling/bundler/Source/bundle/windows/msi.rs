@@ -9,7 +9,7 @@ use std::{self, path::PathBuf};
 
 use crate::Settings;
 
-const WIX_REQUIRED_FILES:&[&str] = &[
+const WIX_REQUIRED_FILES: &[&str] = &[
 	"candle.exe",
 	"candle.exe.config",
 	"darice.cub",
@@ -24,7 +24,7 @@ const WIX_REQUIRED_FILES:&[&str] = &[
 
 /// Runs all of the commands to build the MSI installer.
 /// Returns a vector of PathBuf that shows where the MSI was created.
-pub fn bundle_project(settings:&Settings, updater:bool) -> crate::Result<Vec<PathBuf>> {
+pub fn bundle_project(settings: &Settings, updater: bool) -> crate::Result<Vec<PathBuf>> {
 	let tauri_tools_path = settings
 		.local_tools_directory()
 		.map(|d| d.join(".tauri"))

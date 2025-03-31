@@ -22,9 +22,9 @@ use crate::{
 
 /// Bundles the project.
 /// Returns a vector of PathBuf that shows where the AppImage was created.
-pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
+pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<PathBuf>> {
 	// generate the deb binary name
-	let arch:&str = match settings.binary_arch() {
+	let arch: &str = match settings.binary_arch() {
 		Arch::X86_64 => "amd64",
 		Arch::X86 => "i386",
 		Arch::AArch64 => "aarch64",
@@ -55,8 +55,8 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	}
 
 	// generate deb_folder structure
-	let (data_dir, icons) = debian::generate_data(&settings, &package_dir)
-		.with_context(|| "Failed to build data folders and files")?;
+	let (data_dir, icons) =
+		debian::generate_data(&settings, &package_dir).with_context(|| "Failed to build data folders and files")?;
 	fs_utils::copy_custom_files(&settings.appimage().files, &data_dir)
 		.with_context(|| "Failed to copy custom files")?;
 
@@ -66,8 +66,7 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	}
 	fs::create_dir_all(output_path.clone())?;
 	let app_dir_path = output_path.join(format!("{}.AppDir", settings.product_name()));
-	let appimage_filename =
-		format!("{}_{}_{}.AppImage", settings.product_name(), settings.version_string(), arch);
+	let appimage_filename = format!("{}_{}_{}.AppImage", settings.product_name(), settings.version_string(), arch);
 	let appimage_path = output_path.join(&appimage_filename);
 	fs_utils::create_dir(&app_dir_path, true)?;
 
@@ -77,10 +76,10 @@ pub fn bundle_project(settings:&Settings) -> crate::Result<Vec<PathBuf>> {
 	sh_map.insert("product_name", settings.product_name());
 	sh_map.insert("appimage_filename", &appimage_filename);
 
-	let tauri_tools_path =
-		settings.local_tools_directory().map(|d| d.join(".tauri")).unwrap_or_else(|| {
-			dirs::cache_dir().map_or_else(|| output_path.to_path_buf(), |p| p.join("tauri"))
-		});
+	let tauri_tools_path = settings
+		.local_tools_directory()
+		.map(|d| d.join(".tauri"))
+		.unwrap_or_else(|| dirs::cache_dir().map_or_else(|| output_path.to_path_buf(), |p| p.join("tauri")));
 
 	std::fs::create_dir_all(&tauri_tools_path)?;
 	let tauri_tools_path_str = tauri_tools_path.to_string_lossy();

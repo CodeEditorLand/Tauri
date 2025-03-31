@@ -28,34 +28,36 @@ use crate::{
 pub struct Options {
 	/// Value of `PLATFORM_DISPLAY_NAME` env var
 	#[clap(long)]
-	platform:String,
+	platform: String,
 	/// Value of `SDKROOT` env var
 	#[clap(long)]
-	sdk_root:PathBuf,
+	sdk_root: PathBuf,
 	/// Value of `FRAMEWORK_SEARCH_PATHS` env var
 	#[clap(long)]
-	framework_search_paths:String,
+	framework_search_paths: String,
 	/// Value of `GCC_PREPROCESSOR_DEFINITIONS` env var
 	#[clap(long)]
-	gcc_preprocessor_definitions:String,
+	gcc_preprocessor_definitions: String,
 	/// Value of `HEADER_SEARCH_PATHS` env var
 	#[clap(long)]
-	header_search_paths:String,
+	header_search_paths: String,
 	/// Value of `CONFIGURATION` env var
 	#[clap(long)]
-	configuration:String,
+	configuration: String,
 	/// Value of `FORCE_COLOR` env var
 	#[clap(long)]
-	force_color:bool,
+	force_color: bool,
 	/// Value of `ARCHS` env var
 	#[clap(index = 1, required = true)]
-	arches:Vec<String>,
+	arches: Vec<String>,
 }
 
-pub fn command(options:Options) -> Result<()> {
-	fn macos_from_platform(platform:&str) -> bool { platform == "macOS" }
+pub fn command(options: Options) -> Result<()> {
+	fn macos_from_platform(platform: &str) -> bool {
+		platform == "macOS"
+	}
 
-	fn profile_from_configuration(configuration:&str) -> Profile {
+	fn profile_from_configuration(configuration: &str) -> Profile {
 		if configuration == "release" { Profile::Release } else { Profile::Debug }
 	}
 
@@ -118,8 +120,7 @@ pub fn command(options:Options) -> Result<()> {
 
 	// Host flags that are used by build scripts
 	let macos_isysroot = {
-		let macos_sdk_root =
-			options.sdk_root.join("../../../../MacOSX.platform/Developer/SDKs/MacOSX.sdk");
+		let macos_sdk_root = options.sdk_root.join("../../../../MacOSX.platform/Developer/SDKs/MacOSX.sdk");
 
 		if !macos_sdk_root.is_dir() {
 			return Err(anyhow::anyhow!("Invalid SDK root {}", macos_sdk_root.display()));
@@ -167,10 +168,7 @@ pub fn command(options:Options) -> Result<()> {
 			},
 		};
 
-		let interface = AppInterface::new(
-			tauri_config.lock().unwrap().as_ref().unwrap(),
-			Some(rust_triple.into()),
-		)?;
+		let interface = AppInterface::new(tauri_config.lock().unwrap().as_ref().unwrap(), Some(rust_triple.into()))?;
 
 		let cflags = format!("CFLAGS_{}", env_triple);
 
@@ -189,24 +187,15 @@ pub fn command(options:Options) -> Result<()> {
 		let target = if macos {
 			&macos_target
 		} else {
-			Target::for_arch(&arch).ok_or_else(|| {
-				anyhow::anyhow!("Arch specified by Xcode was invalid. {} isn't a known arch", arch)
-			})?
+			Target::for_arch(&arch)
+				.ok_or_else(|| anyhow::anyhow!("Arch specified by Xcode was invalid. {} isn't a known arch", arch))?
 		};
 
-		target.compile_lib(
-			&config,
-			&metadata,
-			cli_options.noise_level,
-			true,
-			profile,
-			&env,
-			target_env,
-		)?;
+		target.compile_lib(&config, &metadata, cli_options.noise_level, true, profile, &env, target_env)?;
 
 		let bin_path = interface.app_settings().app_binary_path(&InterfaceOptions {
-			debug:matches!(profile, Profile::Debug),
-			target:Some(rust_triple.into()),
+			debug: matches!(profile, Profile::Debug),
+			target: Some(rust_triple.into()),
 			..Default::default()
 		})?;
 
@@ -254,7 +243,7 @@ pub fn command(options:Options) -> Result<()> {
 	Ok(())
 }
 
-fn validate_lib(path:&Path) -> Result<()> {
+fn validate_lib(path: &Path) -> Result<()> {
 	let mut archive = ar::Archive::new(std::fs::File::open(path)?);
 	// Iterate over all entries in the archive:
 	while let Some(entry) = archive.next_entry() {
@@ -280,7 +269,7 @@ fn validate_lib(path:&Path) -> Result<()> {
 	}
 
 	anyhow::bail!(
-    "Library from {} does not include required runtime symbols. This means you are likely missing the tauri::mobile_entry_point macro usage, see the documentation for more information: https://v2.tauri.app/start/migrate/from-tauri-1",
-    path.display()
-  )
+		"Library from {} does not include required runtime symbols. This means you are likely missing the tauri::mobile_entry_point macro usage, see the documentation for more information: https://v2.tauri.app/start/migrate/from-tauri-1",
+		path.display()
+	)
 }

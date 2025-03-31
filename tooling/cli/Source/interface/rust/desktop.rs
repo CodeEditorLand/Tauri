@@ -6,8 +6,7 @@ use std::{
 	io::{BufReader, ErrorKind, Write},
 	process::{Command, ExitStatus, Stdio},
 	sync::{
-		Arc,
-		Mutex,
+		Arc, Mutex,
 		atomic::{AtomicBool, Ordering},
 	},
 };
@@ -19,9 +18,9 @@ use super::{AppSettings, DevProcess, ExitReason, Options, RustAppSettings, Rustu
 use crate::CommandExt;
 
 pub struct DevChild {
-	manually_killed_app:Arc<AtomicBool>,
-	build_child:Option<Arc<SharedChild>>,
-	app_child:Arc<Mutex<Option<Arc<SharedChild>>>>,
+	manually_killed_app: Arc<AtomicBool>,
+	build_child: Option<Arc<SharedChild>>,
+	app_child: Arc<Mutex<Option<Arc<SharedChild>>>>,
 }
 
 impl DevProcess for DevChild {
@@ -57,16 +56,18 @@ impl DevProcess for DevChild {
 		}
 	}
 
-	fn manually_killed_process(&self) -> bool { self.manually_killed_app.load(Ordering::Relaxed) }
+	fn manually_killed_process(&self) -> bool {
+		self.manually_killed_app.load(Ordering::Relaxed)
+	}
 }
 
-pub fn run_dev<F:Fn(Option<i32>, ExitReason) + Send + Sync + 'static>(
-	options:Options,
-	run_args:Vec<String>,
-	available_targets:&mut Option<Vec<RustupTarget>>,
-	config_features:Vec<String>,
-	app_settings:&RustAppSettings,
-	on_exit:F,
+pub fn run_dev<F: Fn(Option<i32>, ExitReason) + Send + Sync + 'static>(
+	options: Options,
+	run_args: Vec<String>,
+	available_targets: &mut Option<Vec<RustupTarget>>,
+	config_features: Vec<String>,
+	app_settings: &RustAppSettings,
+	on_exit: F,
 ) -> crate::Result<impl DevProcess> {
 	let bin_path = app_settings.app_binary_path(&options)?;
 
@@ -78,49 +79,48 @@ pub fn run_dev<F:Fn(Option<i32>, ExitReason) + Send + Sync + 'static>(
 
 	let app_child_ = app_child.clone();
 
-	let build_child =
-		build_dev_app(options, available_targets, config_features, move |status, reason| {
-			if status == Some(0) {
-				let mut app = Command::new(bin_path);
+	let build_child = build_dev_app(options, available_targets, config_features, move |status, reason| {
+		if status == Some(0) {
+			let mut app = Command::new(bin_path);
 
-				app.stdout(os_pipe::dup_stdout().unwrap());
+			app.stdout(os_pipe::dup_stdout().unwrap());
 
-				app.stderr(os_pipe::dup_stderr().unwrap());
+			app.stderr(os_pipe::dup_stderr().unwrap());
 
-				app.args(run_args);
+			app.args(run_args);
 
-				let app_child = Arc::new(SharedChild::spawn(&mut app).unwrap());
+			let app_child = Arc::new(SharedChild::spawn(&mut app).unwrap());
 
-				crate::dev::wait_dev_process(
-					DevChild {
-						manually_killed_app:manually_killed_app_,
-						build_child:None,
-						app_child:Arc::new(Mutex::new(Some(app_child.clone()))),
-					},
-					on_exit,
-				);
+			crate::dev::wait_dev_process(
+				DevChild {
+					manually_killed_app: manually_killed_app_,
+					build_child: None,
+					app_child: Arc::new(Mutex::new(Some(app_child.clone()))),
+				},
+				on_exit,
+			);
 
-				app_child_.lock().unwrap().replace(app_child);
-			} else {
-				on_exit(
-					status,
-					if manually_killed_app_.load(Ordering::Relaxed) {
-						ExitReason::TriggeredKill
-					} else {
-						reason
-					},
-				);
-			}
-		})?;
+			app_child_.lock().unwrap().replace(app_child);
+		} else {
+			on_exit(
+				status,
+				if manually_killed_app_.load(Ordering::Relaxed) {
+					ExitReason::TriggeredKill
+				} else {
+					reason
+				},
+			);
+		}
+	})?;
 
-	Ok(DevChild { manually_killed_app, build_child:Some(build_child), app_child })
+	Ok(DevChild { manually_killed_app, build_child: Some(build_child), app_child })
 }
 
 pub fn build(
-	options:Options,
-	app_settings:&RustAppSettings,
-	available_targets:&mut Option<Vec<RustupTarget>>,
-	config_features:Vec<String>,
+	options: Options,
+	app_settings: &RustAppSettings,
+	available_targets: &mut Option<Vec<RustupTarget>>,
+	config_features: Vec<String>,
 ) -> crate::Result<()> {
 	let bin_path = app_settings.app_binary_path(&options)?;
 
@@ -133,8 +133,7 @@ pub fn build(
 	}
 
 	if options.target == Some("universal-apple-darwin".into()) {
-		std::fs::create_dir_all(out_dir)
-			.with_context(|| "failed to create project out directory")?;
+		std::fs::create_dir_all(out_dir).with_context(|| "failed to create project out directory")?;
 
 		let mut lipo_cmd = Command::new("lipo");
 
@@ -163,18 +162,17 @@ pub fn build(
 			)));
 		}
 	} else {
-		build_production_app(options, available_targets, config_features)
-			.with_context(|| "failed to build app")?;
+		build_production_app(options, available_targets, config_features).with_context(|| "failed to build app")?;
 	}
 
 	Ok(())
 }
 
-fn build_dev_app<F:FnOnce(Option<i32>, ExitReason) + Send + 'static>(
-	options:Options,
-	available_targets:&mut Option<Vec<RustupTarget>>,
-	config_features:Vec<String>,
-	on_exit:F,
+fn build_dev_app<F: FnOnce(Option<i32>, ExitReason) + Send + 'static>(
+	options: Options,
+	available_targets: &mut Option<Vec<RustupTarget>>,
+	config_features: Vec<String>,
+	on_exit: F,
 ) -> crate::Result<Arc<SharedChild>> {
 	let mut build_cmd = build_command(options, available_targets, config_features)?;
 
@@ -200,17 +198,15 @@ fn build_dev_app<F:FnOnce(Option<i32>, ExitReason) + Send + 'static>(
 
 	let build_child = match SharedChild::spawn(&mut build_cmd) {
 		Ok(c) => Ok(c),
-		Err(e) if e.kind() == ErrorKind::NotFound => {
-			Err(anyhow::anyhow!(
-				"`{}` command not found.{}",
-				runner,
-				if runner == "cargo" {
-					" Please follow the Tauri setup guide: https://tauri.app/v1/guides/getting-started/prerequisites"
-				} else {
-					""
-				}
-			))
-		},
+		Err(e) if e.kind() == ErrorKind::NotFound => Err(anyhow::anyhow!(
+			"`{}` command not found.{}",
+			runner,
+			if runner == "cargo" {
+				" Please follow the Tauri setup guide: https://tauri.app/v1/guides/getting-started/prerequisites"
+			} else {
+				""
+			}
+		)),
 		Err(e) => Err(e.into()),
 	}?;
 
@@ -276,9 +272,9 @@ fn build_dev_app<F:FnOnce(Option<i32>, ExitReason) + Send + 'static>(
 }
 
 fn build_production_app(
-	options:Options,
-	available_targets:&mut Option<Vec<RustupTarget>>,
-	config_features:Vec<String>,
+	options: Options,
+	available_targets: &mut Option<Vec<RustupTarget>>,
+	config_features: Vec<String>,
 ) -> crate::Result<()> {
 	let mut build_cmd = build_command(options, available_targets, config_features)?;
 
@@ -287,25 +283,23 @@ fn build_production_app(
 	match build_cmd.piped() {
 		Ok(status) if status.success() => Ok(()),
 		Ok(_) => Err(anyhow::anyhow!("failed to build app")),
-		Err(e) if e.kind() == ErrorKind::NotFound => {
-			Err(anyhow::anyhow!(
-				"`{}` command not found.{}",
-				runner,
-				if runner == "cargo" {
-					" Please follow the Tauri setup guide: https://tauri.app/v1/guides/getting-started/prerequisites"
-				} else {
-					""
-				}
-			))
-		},
+		Err(e) if e.kind() == ErrorKind::NotFound => Err(anyhow::anyhow!(
+			"`{}` command not found.{}",
+			runner,
+			if runner == "cargo" {
+				" Please follow the Tauri setup guide: https://tauri.app/v1/guides/getting-started/prerequisites"
+			} else {
+				""
+			}
+		)),
 		Err(e) => Err(e.into()),
 	}
 }
 
 fn build_command(
-	options:Options,
-	available_targets:&mut Option<Vec<RustupTarget>>,
-	config_features:Vec<String>,
+	options: Options,
+	available_targets: &mut Option<Vec<RustupTarget>>,
+	config_features: Vec<String>,
 ) -> crate::Result<Command> {
 	let runner = options.runner.unwrap_or_else(|| "cargo".into());
 
@@ -378,7 +372,7 @@ fn fetch_available_targets() -> Option<Vec<RustupTarget>> {
 	}
 }
 
-fn validate_target(available_targets:&Option<Vec<RustupTarget>>, target:&str) -> crate::Result<()> {
+fn validate_target(available_targets: &Option<Vec<RustupTarget>>, target: &str) -> crate::Result<()> {
 	if let Some(available_targets) = available_targets {
 		if let Some(target) = available_targets.iter().find(|t| t.name == target) {
 			if !target.installed {
@@ -415,7 +409,7 @@ mod terminal {
 
 	pub fn stderr_width() -> Option<usize> {
 		unsafe {
-			let mut winsize:libc::winsize = mem::zeroed();
+			let mut winsize: libc::winsize = mem::zeroed();
 			// The .into() here is needed for FreeBSD which defines TIOCGWINSZ
 			// as c_uint but ioctl wants c_ulong.
 			#[allow(clippy::useless_conversion)]
@@ -437,12 +431,7 @@ mod terminal {
 		Win32::{
 			Foundation::{CloseHandle, GENERIC_READ, GENERIC_WRITE, INVALID_HANDLE_VALUE},
 			Storage::FileSystem::{CreateFileA, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_EXISTING},
-			System::Console::{
-				CONSOLE_SCREEN_BUFFER_INFO,
-				GetConsoleScreenBufferInfo,
-				GetStdHandle,
-				STD_ERROR_HANDLE,
-			},
+			System::Console::{CONSOLE_SCREEN_BUFFER_INFO, GetConsoleScreenBufferInfo, GetStdHandle, STD_ERROR_HANDLE},
 		},
 		core::PCSTR,
 	};
@@ -451,7 +440,7 @@ mod terminal {
 		unsafe {
 			let stdout = GetStdHandle(STD_ERROR_HANDLE);
 
-			let mut csbi:CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
+			let mut csbi: CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
 
 			if GetConsoleScreenBufferInfo(stdout, &mut csbi) != 0 {
 				return Some((csbi.srWindow.Right - csbi.srWindow.Left) as usize);
@@ -474,7 +463,7 @@ mod terminal {
 				return None;
 			}
 
-			let mut csbi:CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
+			let mut csbi: CONSOLE_SCREEN_BUFFER_INFO = mem::zeroed();
 
 			let rc = GetConsoleScreenBufferInfo(h, &mut csbi);
 

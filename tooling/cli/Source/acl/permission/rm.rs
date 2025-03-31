@@ -9,7 +9,7 @@ use tauri_utils::acl::{PERMISSION_SCHEMA_FILE_NAME, manifest::PermissionFile};
 
 use crate::{Result, acl::FileFormat, helpers::app_paths::resolve_tauri_dir};
 
-fn rm_permission_files(identifier:&str, dir:&Path) -> Result<()> {
+fn rm_permission_files(identifier: &str, dir: &Path) -> Result<()> {
 	for entry in std::fs::read_dir(dir)?.flatten() {
 		let file_type = entry.file_type()?;
 
@@ -26,7 +26,7 @@ fn rm_permission_files(identifier:&str, dir:&Path) -> Result<()> {
 				continue;
 			}
 
-			let (mut permission_file, format):(PermissionFile, FileFormat) =
+			let (mut permission_file, format): (PermissionFile, FileFormat) =
 				match path.extension().and_then(|o| o.to_str()) {
 					Some("toml") => {
 						let content = std::fs::read_to_string(&path)?;
@@ -80,7 +80,7 @@ fn rm_permission_files(identifier:&str, dir:&Path) -> Result<()> {
 	Ok(())
 }
 
-fn rm_permission_from_capabilities(identifier:&str, dir:&Path) -> Result<()> {
+fn rm_permission_from_capabilities(identifier: &str, dir: &Path) -> Result<()> {
 	for entry in std::fs::read_dir(dir)?.flatten() {
 		let file_type = entry.file_type()?;
 
@@ -92,13 +92,10 @@ fn rm_permission_from_capabilities(identifier:&str, dir:&Path) -> Result<()> {
 					let content = std::fs::read_to_string(&path)?;
 
 					if let Ok(mut value) = content.parse::<toml_edit::DocumentMut>() {
-						if let Some(permissions) =
-							value.get_mut("permissions").and_then(|p| p.as_array_mut())
-						{
+						if let Some(permissions) = value.get_mut("permissions").and_then(|p| p.as_array_mut()) {
 							let prev_len = permissions.len();
 
-							permissions
-								.retain(|p| p.as_str().map(|p| p != identifier).unwrap_or(false));
+							permissions.retain(|p| p.as_str().map(|p| p != identifier).unwrap_or(false));
 
 							if prev_len != permissions.len() {
 								std::fs::write(&path, value.to_string())?;
@@ -112,13 +109,10 @@ fn rm_permission_from_capabilities(identifier:&str, dir:&Path) -> Result<()> {
 					let content = std::fs::read(&path)?;
 
 					if let Ok(mut value) = serde_json::from_slice::<serde_json::Value>(&content) {
-						if let Some(permissions) =
-							value.get_mut("permissions").and_then(|p| p.as_array_mut())
-						{
+						if let Some(permissions) = value.get_mut("permissions").and_then(|p| p.as_array_mut()) {
 							let prev_len = permissions.len();
 
-							permissions
-								.retain(|p| p.as_str().map(|p| p != identifier).unwrap_or(false));
+							permissions.retain(|p| p.as_str().map(|p| p != identifier).unwrap_or(false));
 
 							if prev_len != permissions.len() {
 								std::fs::write(&path, serde_json::to_vec_pretty(&value)?)?;
@@ -140,10 +134,10 @@ fn rm_permission_from_capabilities(identifier:&str, dir:&Path) -> Result<()> {
 #[clap(about = "Remove a permission file, and its reference from any capability")]
 pub struct Options {
 	/// Permission to remove.
-	identifier:String,
+	identifier: String,
 }
 
-pub fn command(options:Options) -> Result<()> {
+pub fn command(options: Options) -> Result<()> {
 	let permissions_dir = std::env::current_dir()?.join("permissions");
 
 	if permissions_dir.exists() {

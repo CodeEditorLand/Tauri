@@ -14,13 +14,13 @@ use crate::{Result, helpers::app_paths::tauri_dir};
 #[clap(about = "List permissions available to your application")]
 pub struct Options {
 	/// Name of the plugin to list permissions.
-	plugin:Option<String>,
+	plugin: Option<String>,
 	/// Permission identifier filter.
 	#[clap(short, long)]
-	filter:Option<String>,
+	filter: Option<String>,
 }
 
-pub fn command(options:Options) -> Result<()> {
+pub fn command(options: Options) -> Result<()> {
 	crate::helpers::app_paths::resolve();
 
 	let acl_manifests_path = tauri_dir().join("gen").join("schemas").join("acl-manifests.json");
@@ -37,8 +37,7 @@ pub fn command(options:Options) -> Result<()> {
 
 			let mut permissions = Vec::new();
 
-			let prefix =
-				if key == APP_ACL_KEY { "".to_string() } else { format!("{}:", key.magenta()) };
+			let prefix = if key == APP_ACL_KEY { "".to_string() } else { format!("{}:", key.magenta()) };
 
 			if let Some(default) = manifest.default_permission {
 				if options.filter.as_ref().map(|f| "default".contains(f)).unwrap_or(true) {

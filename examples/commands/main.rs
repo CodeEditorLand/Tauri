@@ -9,18 +9,16 @@ mod commands;
 use commands::{cmd, invoke, message, resolver};
 use serde::Deserialize;
 use tauri::{
-	State,
-	Window,
-	command,
+	State, Window, command,
 	ipc::{Request, Response},
 };
 
 #[derive(Debug)]
 pub struct MyState {
 	#[allow(dead_code)]
-	value:u64,
+	value: u64,
 	#[allow(dead_code)]
-	label:String,
+	label: String,
 }
 
 #[derive(Debug, serde::Serialize)]
@@ -30,59 +28,54 @@ enum MyError {
 
 // ------------------------ Commands using Window ------------------------
 #[command]
-fn window_label(window:Window) {
+fn window_label(window: Window) {
 	println!("window label: {}", window.label());
 }
 
 // Async commands
 
 #[command]
-async fn async_simple_command(the_argument:String) {
+async fn async_simple_command(the_argument: String) {
 	println!("{the_argument}");
 }
 
 #[command(rename_all = "snake_case")]
-async fn async_simple_command_snake(the_argument:String) {
+async fn async_simple_command_snake(the_argument: String) {
 	println!("{the_argument}");
 }
 
 #[command]
-async fn async_stateful_command(
-	the_argument:Option<String>,
-	state:State<'_, MyState>,
-) -> Result<(), ()> {
+async fn async_stateful_command(the_argument: Option<String>, state: State<'_, MyState>) -> Result<(), ()> {
 	println!("{:?} {:?}", the_argument, state.inner());
 	Ok(())
 }
 // ------------------------ Raw future commands ------------------------
 
 #[command(async)]
-fn future_simple_command(the_argument:String) -> impl std::future::Future<Output = ()> {
+fn future_simple_command(the_argument: String) -> impl std::future::Future<Output = ()> {
 	println!("{the_argument}");
 	std::future::ready(())
 }
 
 #[command(async)]
-fn future_simple_command_with_return(
-	the_argument:String,
-) -> impl std::future::Future<Output = String> {
+fn future_simple_command_with_return(the_argument: String) -> impl std::future::Future<Output = String> {
 	println!("{the_argument}");
 	std::future::ready(the_argument)
 }
 
 #[command(async)]
-fn future_simple_command_with_result(
-	the_argument:String,
-) -> impl std::future::Future<Output = Result<String, ()>> {
+fn future_simple_command_with_result(the_argument: String) -> impl std::future::Future<Output = Result<String, ()>> {
 	println!("{the_argument}");
 	std::future::ready(Ok(the_argument))
 }
 
 #[command(async)]
-fn force_async(the_argument:String) -> String { the_argument }
+fn force_async(the_argument: String) -> String {
+	the_argument
+}
 
 #[command(async)]
-fn force_async_with_result(the_argument:&str) -> Result<&str, MyError> {
+fn force_async_with_result(the_argument: &str) -> Result<&str, MyError> {
 	(!the_argument.is_empty()).then_some(the_argument).ok_or(MyError::FooError)
 }
 
@@ -90,48 +83,45 @@ fn force_async_with_result(the_argument:&str) -> Result<&str, MyError> {
 // ------------------------
 
 #[command(async, rename_all = "snake_case")]
-fn future_simple_command_snake(the_argument:String) -> impl std::future::Future<Output = ()> {
+fn future_simple_command_snake(the_argument: String) -> impl std::future::Future<Output = ()> {
 	println!("{the_argument}");
 	std::future::ready(())
 }
 
 #[command(async, rename_all = "snake_case")]
-fn future_simple_command_with_return_snake(
-	the_argument:String,
-) -> impl std::future::Future<Output = String> {
+fn future_simple_command_with_return_snake(the_argument: String) -> impl std::future::Future<Output = String> {
 	println!("{the_argument}");
 	std::future::ready(the_argument)
 }
 
 #[command(async, rename_all = "snake_case")]
 fn future_simple_command_with_result_snake(
-	the_argument:String,
+	the_argument: String,
 ) -> impl std::future::Future<Output = Result<String, ()>> {
 	println!("{the_argument}");
 	std::future::ready(Ok(the_argument))
 }
 
 #[command(async, rename_all = "snake_case")]
-fn force_async_snake(the_argument:String) -> String { the_argument }
+fn force_async_snake(the_argument: String) -> String {
+	the_argument
+}
 
 #[command(rename_all = "snake_case", async)]
-fn force_async_with_result_snake(the_argument:&str) -> Result<&str, MyError> {
+fn force_async_with_result_snake(the_argument: &str) -> Result<&str, MyError> {
 	(!the_argument.is_empty()).then_some(the_argument).ok_or(MyError::FooError)
 }
 
 // ------------------------ Commands returning Result ------------------------
 
 #[command]
-fn simple_command_with_result(the_argument:String) -> Result<String, MyError> {
+fn simple_command_with_result(the_argument: String) -> Result<String, MyError> {
 	println!("{the_argument}");
 	(!the_argument.is_empty()).then_some(the_argument).ok_or(MyError::FooError)
 }
 
 #[command]
-fn stateful_command_with_result(
-	the_argument:Option<String>,
-	state:State<'_, MyState>,
-) -> Result<String, MyError> {
+fn stateful_command_with_result(the_argument: Option<String>, state: State<'_, MyState>) -> Result<String, MyError> {
 	println!("{:?} {:?}", the_argument, state.inner());
 	dbg!(the_argument.ok_or(MyError::FooError))
 }
@@ -140,15 +130,15 @@ fn stateful_command_with_result(
 // ------------------------
 
 #[command(rename_all = "snake_case")]
-fn simple_command_with_result_snake(the_argument:String) -> Result<String, MyError> {
+fn simple_command_with_result_snake(the_argument: String) -> Result<String, MyError> {
 	println!("{the_argument}");
 	(!the_argument.is_empty()).then_some(the_argument).ok_or(MyError::FooError)
 }
 
 #[command(rename_all = "snake_case")]
 fn stateful_command_with_result_snake(
-	the_argument:Option<String>,
-	state:State<'_, MyState>,
+	the_argument: Option<String>,
+	state: State<'_, MyState>,
 ) -> Result<String, MyError> {
 	println!("{:?} {:?}", the_argument, state.inner());
 	dbg!(the_argument.ok_or(MyError::FooError))
@@ -157,15 +147,15 @@ fn stateful_command_with_result_snake(
 // Async commands
 
 #[command]
-async fn async_simple_command_with_result(the_argument:String) -> Result<String, MyError> {
+async fn async_simple_command_with_result(the_argument: String) -> Result<String, MyError> {
 	println!("{the_argument}");
 	Ok(the_argument)
 }
 
 #[command]
 async fn async_stateful_command_with_result(
-	the_argument:Option<String>,
-	state:State<'_, MyState>,
+	the_argument: Option<String>,
+	state: State<'_, MyState>,
 ) -> Result<String, MyError> {
 	println!("{:?} {:?}", the_argument, state.inner());
 	Ok(the_argument.unwrap_or_default())
@@ -174,16 +164,18 @@ async fn async_stateful_command_with_result(
 // Non-Ident command function arguments
 
 #[command]
-fn command_arguments_wild(_:Window) { println!("we saw the wildcard!") }
+fn command_arguments_wild(_: Window) {
+	println!("we saw the wildcard!")
+}
 
 #[derive(Deserialize)]
 struct Person<'a> {
-	name:&'a str,
-	age:u8,
+	name: &'a str,
+	age: u8,
 }
 
 #[command]
-fn command_arguments_struct(Person { name, age }:Person<'_>) {
+fn command_arguments_struct(Person { name, age }: Person<'_>) {
 	println!("received person struct with name: {name} | age: {age}")
 }
 
@@ -191,25 +183,29 @@ fn command_arguments_struct(Person { name, age }:Person<'_>) {
 struct InlinePerson<'a>(&'a str, u8);
 
 #[command]
-fn command_arguments_tuple_struct(InlinePerson(name, age):InlinePerson<'_>) {
+fn command_arguments_tuple_struct(InlinePerson(name, age): InlinePerson<'_>) {
 	println!("received person tuple with name: {name} | age: {age}")
 }
 
 #[command]
-fn borrow_cmd(the_argument:&str) -> &str { the_argument }
+fn borrow_cmd(the_argument: &str) -> &str {
+	the_argument
+}
 
 #[command]
-fn borrow_cmd_async(the_argument:&str) -> &str { the_argument }
+fn borrow_cmd_async(the_argument: &str) -> &str {
+	the_argument
+}
 
 #[command]
-fn raw_request(request:Request<'_>) -> Response {
+fn raw_request(request: Request<'_>) -> Response {
 	println!("{request:?}");
 	Response::new(include_bytes!("./README.md").to_vec())
 }
 
 fn main() {
 	tauri::Builder::default()
-		.manage(MyState { value:0, label:"Tauri!".into() })
+		.manage(MyState { value: 0, label: "Tauri!".into() })
 		.invoke_handler(tauri::generate_handler![
 			borrow_cmd,
 			borrow_cmd_async,

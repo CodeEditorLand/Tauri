@@ -13,20 +13,19 @@ use crate::{
 	interface::rust::manifest::{read_manifest, serialize_manifest},
 };
 
-const CRATE_TYPES:[&str; 3] = ["lib", "staticlib", "cdylib"];
+const CRATE_TYPES: [&str; 3] = ["lib", "staticlib", "cdylib"];
 
-pub fn migrate(tauri_dir:&Path) -> Result<()> {
+pub fn migrate(tauri_dir: &Path) -> Result<()> {
 	let manifest_path = tauri_dir.join("Cargo.toml");
 	let (mut manifest, _) = read_manifest(&manifest_path)?;
 	migrate_manifest(&mut manifest)?;
 
-	std::fs::write(&manifest_path, serialize_manifest(&manifest))
-		.context("failed to rewrite Cargo manifest")?;
+	std::fs::write(&manifest_path, serialize_manifest(&manifest)).context("failed to rewrite Cargo manifest")?;
 
 	Ok(())
 }
 
-fn migrate_manifest(manifest:&mut DocumentMut) -> Result<()> {
+fn migrate_manifest(manifest: &mut DocumentMut) -> Result<()> {
 	let version = dependency_version();
 
 	let remove_features = features_to_remove();
@@ -95,9 +94,7 @@ fn migrate_manifest(manifest:&mut DocumentMut) -> Result<()> {
 					let mut crate_types_to_add = CRATE_TYPES.to_vec();
 					for t in types.iter() {
 						// type is already in the manifest, skip adding it
-						if let Some(i) =
-							crate_types_to_add.iter().position(|ty| Some(ty) == t.as_str().as_ref())
-						{
+						if let Some(i) = crate_types_to_add.iter().position(|ty| Some(ty) == t.as_str().as_ref()) {
 							crate_types_to_add.remove(i);
 						}
 					}
@@ -119,11 +116,7 @@ fn migrate_manifest(manifest:&mut DocumentMut) -> Result<()> {
 	Ok(())
 }
 
-fn find_dependency<'a>(
-	manifest:&'a mut DocumentMut,
-	name:&'a str,
-	table:&'a str,
-) -> Vec<&'a mut Item> {
+fn find_dependency<'a>(manifest: &'a mut DocumentMut, name: &'a str, table: &'a str) -> Vec<&'a mut Item> {
 	let m = manifest.as_table_mut();
 	for (k, v) in m.iter_mut() {
 		if let Some(t) = v.as_table_mut() {
@@ -198,7 +191,7 @@ fn dependency_version() -> String {
 	}
 }
 
-fn migrate_dependency(item:&mut Item, version:&str, remove:&[&str], rename:&[(&str, &str)]) {
+fn migrate_dependency(item: &mut Item, version: &str, remove: &[&str], rename: &[(&str, &str)]) {
 	if let Some(dep) = item.as_table_mut() {
 		migrate_dependency_table(dep, version, remove, rename);
 	} else if let Some(Value::InlineTable(table)) = item.as_value_mut() {
@@ -208,12 +201,7 @@ fn migrate_dependency(item:&mut Item, version:&str, remove:&[&str], rename:&[(&s
 	}
 }
 
-fn migrate_dependency_table<D:TableLike>(
-	dep:&mut D,
-	version:&str,
-	remove:&[&str],
-	rename:&[(&str, &str)],
-) {
+fn migrate_dependency_table<D: TableLike>(dep: &mut D, version: &str, remove: &[&str], rename: &[(&str, &str)]) {
 	dep.remove("rev");
 	dep.remove("git");
 	dep.remove("branch");
@@ -231,9 +219,7 @@ fn migrate_dependency_table<D:TableLike>(
 			if let Some(f) = features_array.get(index).and_then(|f| f.as_str()) {
 				if remove.contains(&f) {
 					features_array.remove(index);
-				} else if let Some((_from, rename_to)) =
-					rename.iter().find(|(from, _to)| *from == f)
-				{
+				} else if let Some((_from, rename_to)) = rename.iter().find(|(from, _to)| *from == f) {
 					features_array.remove(index);
 					add_features.push(rename_to);
 				}
@@ -251,7 +237,7 @@ fn migrate_dependency_table<D:TableLike>(
 mod tests {
 	use itertools::Itertools;
 
-	fn migrate_deps<F:FnOnce(&[&str]) -> String>(get_toml:F) {
+	fn migrate_deps<F: FnOnce(&[&str]) -> String>(get_toml: F) {
 		let keep_features = vec!["isolation", "protocol-asset"];
 
 		let mut features = super::features_to_remove();
@@ -281,10 +267,7 @@ mod tests {
 			// convert the value to a table for the assert logic below
 			let mut table = toml_edit::Table::new();
 			table.insert("version", toml_edit::Item::Value(version.to_string().into()));
-			table.insert(
-				"features",
-				toml_edit::Item::Value(toml_edit::Value::Array(Default::default())),
-			);
+			table.insert("features", toml_edit::Item::Value(toml_edit::Value::Array(Default::default())));
 			table
 		} else {
 			panic!("unexpected tauri dependency format");
@@ -309,9 +292,9 @@ mod tests {
 
 		if toml.contains("reqwest-native-tls-vendored") {
 			assert!(
-				features.iter().any(|f| {
-					f.as_str().expect("feature must be a string") == "native-tls-vendored"
-				}),
+				features
+					.iter()
+					.any(|f| { f.as_str().expect("feature must be a string") == "native-tls-vendored" }),
 				"reqwest-native-tls-vendored was not replaced with native-tls-vendored"
 			);
 		}
@@ -328,9 +311,7 @@ mod tests {
 		for feature in features.iter() {
 			let feature = feature.as_str().expect("feature must be a string");
 			assert!(
-				keep_features.contains(&feature)
-					|| feature == "native-tls-vendored"
-					|| feature == "tray-icon",
+				keep_features.contains(&feature) || feature == "native-tls-vendored" || feature == "tray-icon",
 				"feature {feature} should have been removed"
 			);
 		}

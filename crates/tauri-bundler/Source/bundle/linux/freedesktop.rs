@@ -32,23 +32,20 @@ use crate::{Settings, bundle::common};
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Icon {
-	pub width:u32,
-	pub height:u32,
-	pub is_high_density:bool,
-	pub path:PathBuf,
+	pub width: u32,
+	pub height: u32,
+	pub is_high_density: bool,
+	pub path: PathBuf,
 }
 
 /// Generate the icon files, and returns a map where keys are the icons and
 /// values are their current (source) path.
-pub fn list_icon_files(
-	settings:&Settings,
-	data_dir:&Path,
-) -> crate::Result<BTreeMap<Icon, PathBuf>> {
+pub fn list_icon_files(settings: &Settings, data_dir: &Path) -> crate::Result<BTreeMap<Icon, PathBuf>> {
 	let base_dir = data_dir.join("usr/share/icons/hicolor");
 
 	let main_binary_name = settings.main_binary_name()?;
 
-	let get_dest_path = |width:u32, height:u32, is_high_density:bool| {
+	let get_dest_path = |width: u32, height: u32, is_high_density: bool| {
 		base_dir.join(format!(
 			"{}x{}{}/apps/{}.png",
 			width,
@@ -78,7 +75,7 @@ pub fn list_icon_files(
 
 			let dest_path = get_dest_path(width, height, is_high_density);
 
-			Icon { width, height, is_high_density, path:dest_path }
+			Icon { width, height, is_high_density, path: dest_path }
 		};
 
 		icons.entry(icon).or_insert(icon_path);
@@ -88,7 +85,7 @@ pub fn list_icon_files(
 }
 
 /// Generate the icon files and store them under the `data_dir`.
-pub fn copy_icon_files(settings:&Settings, data_dir:&Path) -> crate::Result<Vec<Icon>> {
+pub fn copy_icon_files(settings: &Settings, data_dir: &Path) -> crate::Result<Vec<Icon>> {
 	let icons = list_icon_files(settings, data_dir)?;
 
 	for (icon, src) in &icons {
@@ -102,9 +99,9 @@ pub fn copy_icon_files(settings:&Settings, data_dir:&Path) -> crate::Result<Vec<
 /// Returns the path of the resulting file (source path) and the destination
 /// path in the package.
 pub fn generate_desktop_file(
-	settings:&Settings,
-	custom_template_path:&Option<PathBuf>,
-	data_dir:&Path,
+	settings: &Settings,
+	custom_template_path: &Option<PathBuf>,
+	data_dir: &Path,
 ) -> crate::Result<(PathBuf, PathBuf)> {
 	let bin_name = settings.main_binary_name()?;
 
@@ -136,20 +133,19 @@ pub fn generate_desktop_file(
 
 	#[derive(Serialize)]
 	struct DesktopTemplateParams<'a> {
-		categories:&'a str,
-		comment:Option<&'a str>,
-		exec:&'a str,
-		icon:&'a str,
-		name:&'a str,
-		mime_type:Option<String>,
-		long_description:String,
+		categories: &'a str,
+		comment: Option<&'a str>,
+		exec: &'a str,
+		icon: &'a str,
+		name: &'a str,
+		mime_type: Option<String>,
+		long_description: String,
 	}
 
-	let mut mime_type:Vec<String> = Vec::new();
+	let mut mime_type: Vec<String> = Vec::new();
 
 	if let Some(associations) = settings.file_associations() {
-		mime_type
-			.extend(associations.iter().filter_map(|association| association.mime_type.clone()));
+		mime_type.extend(associations.iter().filter_map(|association| association.mime_type.clone()));
 	}
 
 	if let Some(protocols) = settings.deep_link_protocols() {
@@ -166,20 +162,20 @@ pub fn generate_desktop_file(
 	handlebars.render_to_write(
 		"main.desktop",
 		&DesktopTemplateParams {
-			categories:settings
+			categories: settings
 				.app_category()
 				.map(|app_category| app_category.freedesktop_categories())
 				.unwrap_or(""),
-			comment:if !settings.short_description().is_empty() {
+			comment: if !settings.short_description().is_empty() {
 				Some(settings.short_description())
 			} else {
 				None
 			},
-			exec:bin_name,
-			icon:bin_name,
-			name:settings.product_name(),
+			exec: bin_name,
+			icon: bin_name,
+			name: settings.product_name(),
 			mime_type,
-			long_description:settings.long_description().unwrap_or_default().to_string(),
+			long_description: settings.long_description().unwrap_or_default().to_string(),
 		},
 		file,
 	)?;

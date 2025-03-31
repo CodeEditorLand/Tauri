@@ -17,8 +17,7 @@ fn main() {
 				.build()?;
 
 			let _webview1 = window.add_child(
-				tauri::webview::WebviewBuilder::new("main1", WebviewUrl::App(Default::default()))
-					.auto_resize(),
+				tauri::webview::WebviewBuilder::new("main1", WebviewUrl::App(Default::default())).auto_resize(),
 				LogicalPosition::new(0., 0.),
 				LogicalSize::new(width / 2., height / 2.),
 			)?;

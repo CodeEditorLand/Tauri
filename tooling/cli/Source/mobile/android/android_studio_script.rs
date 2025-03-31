@@ -30,13 +30,13 @@ pub struct Options {
     default_value = Target::DEFAULT_KEY,
     value_parser(clap::builder::PossibleValuesParser::new(Target::name_list()))
   )]
-	targets:Option<Vec<String>>,
+	targets: Option<Vec<String>>,
 	/// Builds with the release flag
 	#[clap(short, long)]
-	release:bool,
+	release: bool,
 }
 
-pub fn command(options:Options) -> Result<()> {
+pub fn command(options: Options) -> Result<()> {
 	crate::helpers::app_paths::resolve();
 
 	let profile = if options.release { Profile::Release } else { Profile::Debug };
@@ -51,11 +51,7 @@ pub fn command(options:Options) -> Result<()> {
 		let cli_options = read_options(&tauri_config_.identifier);
 
 		let (config, metadata) = get_config(
-			&get_app(
-				MobileTarget::Android,
-				tauri_config_,
-				&AppInterface::new(tauri_config_, None)?,
-			),
+			&get_app(MobileTarget::Android, tauri_config_, &AppInterface::new(tauri_config_, None)?),
 			tauri_config_,
 			None,
 			&cli_options,
@@ -88,25 +84,18 @@ pub fn command(options:Options) -> Result<()> {
 
 			// if there's a known target, we should force use it
 			if let Some(target_device) = &cli_options.target_device {
-				run_adb_reverse(&env, &target_device.id, &forward, &forward).with_context(
-					|| {
-						format!(
-							"failed to forward port with adb, is the {} device connected?",
-							target_device.name,
-						)
-					},
-				)?;
+				run_adb_reverse(&env, &target_device.id, &forward, &forward).with_context(|| {
+					format!(
+						"failed to forward port with adb, is the {} device connected?",
+						target_device.name,
+					)
+				})?;
 			} else if devices.len() == 1 {
 				let device = devices.first().unwrap();
 
-				run_adb_reverse(&env, device.serial_no(), &forward, &forward).with_context(
-					|| {
-						format!(
-							"failed to forward port with adb, is the {} device connected?",
-							device.name(),
-						)
-					},
-				)?;
+				run_adb_reverse(&env, device.serial_no(), &forward, &forward).with_context(|| {
+					format!("failed to forward port with adb, is the {} device connected?", device.name(),)
+				})?;
 			} else if devices.len() > 1 {
 				anyhow::bail!(
 					"Multiple Android devices are connected ({}), please disconnect devices you \
@@ -123,14 +112,13 @@ pub fn command(options:Options) -> Result<()> {
 		options.targets.unwrap_or_default().iter(),
 		&detect_target_ok,
 		&env,
-		|target:&Target| {
+		|target: &Target| {
 			target.build(&config, &metadata, &env, cli_options.noise_level, true, profile)?;
 
 			if !validated_lib {
 				validated_lib = true;
 
-				let lib_path =
-					config.app().target_dir(target.triple, profile).join(config.so_name());
+				let lib_path = config.app().target_dir(target.triple, profile).join(config.so_name());
 
 				validate_lib(&lib_path)?;
 			}
@@ -141,11 +129,10 @@ pub fn command(options:Options) -> Result<()> {
 	.map_err(|e| anyhow::anyhow!(e.to_string()))?
 }
 
-fn validate_lib(path:&Path) -> Result<()> {
+fn validate_lib(path: &Path) -> Result<()> {
 	let so_bytes = std::fs::read(path)?;
 
-	let elf = elf::ElfBytes::<elf::endian::AnyEndian>::minimal_parse(&so_bytes)
-		.context("failed to parse ELF")?;
+	let elf = elf::ElfBytes::<elf::endian::AnyEndian>::minimal_parse(&so_bytes).context("failed to parse ELF")?;
 
 	let (symbol_table, string_table) = elf
 		.dynamic_symbol_table()
@@ -162,19 +149,19 @@ fn validate_lib(path:&Path) -> Result<()> {
 
 	if !symbols.contains(&"Java_app_tauri_plugin_PluginManager_handlePluginResponse") {
 		anyhow::bail!(
-      "Library from {} does not include required runtime symbols. This means you are likely missing the tauri::mobile_entry_point macro usage, see the documentation for more information: https://v2.tauri.app/start/migrate/from-tauri-1",
-      path.display()
-    );
+			"Library from {} does not include required runtime symbols. This means you are likely missing the tauri::mobile_entry_point macro usage, see the documentation for more information: https://v2.tauri.app/start/migrate/from-tauri-1",
+			path.display()
+		);
 	}
 
 	Ok(())
 }
 
 fn run_adb_reverse(
-	env:&cargo_mobile2::android::env::Env,
-	device_serial_no:&str,
-	remote:&str,
-	local:&str,
+	env: &cargo_mobile2::android::env::Env,
+	device_serial_no: &str,
+	remote: &str,
+	local: &str,
 ) -> std::io::Result<std::process::Output> {
 	adb::adb(env, ["-s", device_serial_no, "reverse", remote, local])
 		.stdin_file(os_pipe::dup_stdin().unwrap())
@@ -183,7 +170,7 @@ fn run_adb_reverse(
 		.run()
 }
 
-fn remove_adb_reverse(env:&cargo_mobile2::android::env::Env, device_serial_no:&str, remote:&str) {
+fn remove_adb_reverse(env: &cargo_mobile2::android::env::Env, device_serial_no: &str, remote: &str) {
 	// ignore errors in case the port is not forwarded
 	let _ = adb::adb(env, ["-s", device_serial_no, "reverse", "--remove", remote])
 		.stdin_file(os_pipe::dup_stdin().unwrap())

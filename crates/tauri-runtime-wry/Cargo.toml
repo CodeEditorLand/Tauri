@@ -1,18 +1,18 @@
 [dependencies]
 http = "1"
-log = "0.4.21"
+log = "0.4.27"
 raw-window-handle = "0.6"
 tao = { version = "0.32.8", default-features = false, features = ["rwh_06"] }
 tauri-runtime = { version = "2.5.0", path = "../tauri-runtime" }
 tauri-utils = { version = "2.3.0", path = "../tauri-utils" }
 tracing = { version = "0.1", optional = true }
 url = "2"
-wry = { version = "0.50.5", default-features = false, features = [
+wry = { default-features = false, features = [
   "drag-drop",
   "protocol",
   "os-webview",
   "linux-body",
-] }
+], workspace = true }
 
 [features]
 devtools = ["wry/devtools", "tauri-runtime/devtools"]
@@ -48,7 +48,7 @@ workspace = true
 [package.homepage]
 workspace = true
 
-[package.license]
+[package.license-file]
 workspace = true
 
 [package.metadata]
@@ -100,10 +100,10 @@ objc2 = "0.6"
 [target."cfg(windows)"]
 
 [target."cfg(windows)".dependencies]
-once_cell = "1.20"
+once_cell = "1.21"
 softbuffer = { version = "0.4", default-features = false }
-webview2-com = "0.36"
+webview2-com = "0.37"
 
 [target."cfg(windows)".dependencies.windows]
 features = ["Win32_Foundation", "Win32_Graphics_Dwm"]
-version = "0.60"
+version = "0.61"

@@ -4,7 +4,7 @@ brotli = { version = "7", optional = true, default-features = false, features = 
   "std",
 ] }
 ico = "0.4"
-json-patch = "3"
+json-patch = "4"
 png = "0.17"
 proc-macro2 = "1"
 quote = "1"
@@ -50,7 +50,7 @@ workspace = true
 [package.homepage]
 workspace = true
 
-[package.license]
+[package.license-file]
 workspace = true
 
 [package.repository]

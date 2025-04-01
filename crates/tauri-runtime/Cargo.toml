@@ -35,7 +35,7 @@ workspace = true
 [package.homepage]
 workspace = true
 
-[package.license]
+[package.license-file]
 workspace = true
 
 [package.metadata]
@@ -84,4 +84,4 @@ url = "2"
 
 [target."cfg(windows)".dependencies.windows]
 features = ["Win32_Foundation", "Win32_System_WinRT"]
-version = "0.60"
+version = "0.61"

@@ -1,10 +1,10 @@
 [[bin]]
 name = "run_benchmark"
-path = "src/run_benchmark.rs"
+path = "Source/run_benchmark.rs"
 
 [[bin]]
 name = "build_benchmark_jsons"
-path = "src/build_benchmark_jsons.rs"
+path = "Source/build_benchmark_jsons.rs"
 
 [dependencies]
 anyhow = "1"

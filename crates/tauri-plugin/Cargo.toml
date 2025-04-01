@@ -1,7 +1,7 @@
 [dependencies]
 anyhow = { version = "1", optional = true }
 glob = { version = "0.3", optional = true }
-schemars = { version = "0.8.18", features = ["preserve_order"] }
+schemars = { version = "0.8.22", features = ["preserve_order"] }
 serde = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 tauri-utils = { version = "2.3.0", default-features = false, features = [
@@ -42,7 +42,7 @@ workspace = true
 [package.homepage]
 workspace = true
 
-[package.license]
+[package.license-file]
 workspace = true
 
 [package.metadata]

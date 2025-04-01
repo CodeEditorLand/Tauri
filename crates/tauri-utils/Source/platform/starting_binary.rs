@@ -13,7 +13,7 @@ use ctor::ctor;
 /// even `main` runs.
 #[ctor]
 #[used]
-pub(super) static STARTING_BINARY:StartingBinary = StartingBinary::new();
+pub(super) static STARTING_BINARY:StartingBinary = { StartingBinary::new() };
 
 /// Represents a binary path that was cached when the program was loaded.
 pub(super) struct StartingBinary(std::io::Result<PathBuf>);
@@ -33,8 +33,7 @@ impl StartingBinary {
 			return Self(Err(Error::new(
 				ErrorKind::InvalidData,
 				format!(
-					"StartingBinary found current_exe() that contains a symlink on a non-allowed \
-					 platform: {}",
+					"StartingBinary found current_exe() that contains a symlink on a non-allowed platform: {}",
 					symlink.display()
 				),
 			)));

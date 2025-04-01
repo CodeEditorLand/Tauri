@@ -1,38 +1,26 @@
-[package]
-name = "tauri-codegen"
-version = "2.1.0"
-description = "code generation meant to be consumed inside of `tauri` through `tauri-build` or `tauri-macros`"
-exclude = ["CHANGELOG.md", "/target"]
-readme = "README.md"
-authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-categories.workspace = true
-license.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-
 [dependencies]
-base64 = { version = "0.22" }
+base64 = "0.22"
 brotli = { version = "7", optional = true, default-features = false, features = [
-	"std",
+  "std",
 ] }
 ico = "0.4"
 json-patch = "3"
 png = "0.17"
 proc-macro2 = "1"
-quote = { version = "1" }
+quote = "1"
 regex = { version = "1", optional = true }
 semver = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sha2 = "0.10"
+syn = "2"
 tauri-utils = { version = "2.3.0", path = "../tauri-utils", features = [
   "build",
 ] }
-thiserror = { version = "2" }
+thiserror = "2"
 url = "2"
 uuid = { version = "1", features = ["v4"] }
-walkdir = { version = "2" }
+walkdir = "2"
 
 [features]
 compression = ["brotli", "tauri-utils/compression"]
@@ -48,7 +36,7 @@ description = "code generation meant to be consumed inside of `tauri` through `t
 exclude = ["CHANGELOG.md", "/target"]
 name = "tauri-codegen"
 readme = "README.md"
-version = "2.0.4"
+version = "2.1.0"
 
 [package.authors]
 workspace = true
@@ -62,7 +50,7 @@ workspace = true
 [package.homepage]
 workspace = true
 
-[package.license-file]
+[package.license]
 workspace = true
 
 [package.repository]
@@ -76,5 +64,5 @@ workspace = true
 [target.'cfg(target_os = "macos")']
 
 [target.'cfg(target_os = "macos")'.dependencies]
-plist = { version = "1" }
+plist = "1"
 time = { version = "0.3", features = ["parsing", "formatting"] }

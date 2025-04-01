@@ -1,22 +1,8 @@
-[package]
-name = "tauri-macros"
-version = "2.1.0"
-description = "Macros for the tauri crate."
-exclude = ["CHANGELOG.md", "/target"]
-readme = "README.md"
-authors.workspace = true
-homepage.workspace = true
-repository.workspace = true
-categories.workspace = true
-license.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-
-[lib]
-proc-macro = true
-
 [dependencies]
 heck = "0.5"
+proc-macro2 = { version = "1", features = ["span-locations"] }
+quote = "1"
+syn = { version = "2", features = ["full"] }
 tauri-codegen = { version = "2.1.0", default-features = false, path = "../tauri-codegen" }
 tauri-utils = { version = "2.3.0", path = "../tauri-utils" }
 
@@ -37,7 +23,7 @@ description = "Macros for the tauri crate."
 exclude = ["CHANGELOG.md", "/target"]
 name = "tauri-macros"
 readme = "README.md"
-version = "2.0.4"
+version = "2.1.0"
 
 [package.authors]
 workspace = true
@@ -51,7 +37,7 @@ workspace = true
 [package.homepage]
 workspace = true
 
-[package.license-file]
+[package.license]
 workspace = true
 
 [package.repository]

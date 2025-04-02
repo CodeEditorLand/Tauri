@@ -238,9 +238,9 @@ tray-icon = { version = "0.20", default-features = false, features = [
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
 
-[target.'cfg(target_os = "macos")']
+[target."cfg(target_os = \"macos\")"]
 
-[target.'cfg(target_os = "macos")'.dependencies]
+[target."cfg(target_os = \"macos\")".dependencies]
 embed_plist = "1.2"
 objc2 = "0.6"
 objc2-app-kit = { version = "0.3", default-features = false, features = [
@@ -260,7 +260,7 @@ objc2-foundation = { version = "0.3", default-features = false, features = [
 plist = "1"
 window-vibrancy = "0.6"
 
-[target.'cfg(target_os = "macos")'.dev-dependencies]
+[target."cfg(target_os = \"macos\")".dev-dependencies]
 objc2-web-kit = { version = "0.3", features = [
   "objc2-app-kit",
   "WKWebView",
@@ -272,7 +272,7 @@ objc2-web-kit = { version = "0.3", features = [
 [target."cfg(windows)".dependencies]
 webview2-com = { version = "0.37", optional = true }
 window-vibrancy = "0.6"
-windows = { version = "0.61", features = [
+windows = { version = "0.61.1", features = [
   "Win32_Foundation",
   "Win32_UI",
   "Win32_UI_WindowsAndMessaging",

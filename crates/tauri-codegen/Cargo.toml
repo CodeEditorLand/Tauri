@@ -61,8 +61,8 @@ workspace = true
 
 [target]
 
-[target.'cfg(target_os = "macos")']
+[target."cfg(target_os = \"macos\")"]
 
-[target.'cfg(target_os = "macos")'.dependencies]
+[target."cfg(target_os = \"macos\")".dependencies]
 plist = "1"
 time = { version = "0.3", features = ["parsing", "formatting"] }

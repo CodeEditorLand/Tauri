@@ -100,7 +100,7 @@ path = "Source/lib.rs"
 authors = ["Tauri Programme within The Commons Conservancy"]
 categories = ["gui", "web-programming"]
 description = "Command line interface for building Tauri apps"
-edition = "2021"
+edition = "2024"
 homepage = "https://tauri.app"
 include = [
   "src/",
@@ -140,9 +140,9 @@ pkg-fmt = "zip"
 [target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "windows", target_os = "macos"))'.dependencies]
 cargo-mobile2 = { version = "0.17", default-features = false }
 
-[target.'cfg(target_os = "macos")']
+[target."cfg(target_os = \"macos\")"]
 
-[target.'cfg(target_os = "macos")'.dependencies]
+[target."cfg(target_os = \"macos\")".dependencies]
 ar = "0.9"
 object = { version = "0.36", default-features = false, features = [
   "macho",

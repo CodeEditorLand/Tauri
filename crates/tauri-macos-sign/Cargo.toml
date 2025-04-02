@@ -20,7 +20,7 @@ path = "Source/lib.rs"
 [package]
 authors = ["Tauri Programme within The Commons Conservancy"]
 description = "Code signing utilities for macOS and iOS apps"
-edition = "2021"
+edition = "2024"
 keywords = ["codesign", "signing", "macos", "ios", "tauri"]
 license = "Apache-2.0 OR MIT"
 name = "tauri-macos-sign"

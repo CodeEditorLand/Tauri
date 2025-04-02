@@ -7,19 +7,19 @@ tauri-runtime = { version = "2.5.0", path = "../tauri-runtime" }
 tauri-utils = { version = "2.3.0", path = "../tauri-utils" }
 tracing = { version = "0.1", optional = true }
 url = "2"
-wry = { default-features = false, features = [
-  "drag-drop",
-  "protocol",
-  "os-webview",
-  "linux-body",
-], workspace = true }
+wry = { version = "0.50.5", default-features = false, features = [
+	"drag-drop",
+	"protocol",
+	"os-webview",
+	"linux-body",
+] }
 
 [features]
 devtools = ["wry/devtools", "tauri-runtime/devtools"]
 macos-private-api = [
-  "wry/fullscreen",
-  "wry/transparent",
-  "tauri-runtime/macos-private-api",
+	"wry/fullscreen",
+	"wry/transparent",
+	"tauri-runtime/macos-private-api",
 ]
 macos-proxy = ["wry/mac-proxy"]
 objc-exception = []
@@ -67,34 +67,34 @@ workspace = true
 
 [target]
 
-[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))']
+[target."cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\"))"]
 
-[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
+[target."cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\"))".dependencies]
 gtk = { version = "0.18", features = ["v3_24"] }
 percent-encoding = "2"
 webkit2gtk = { version = "=2.0", features = ["v2_40"] }
 
-[target.'cfg(target_os = "android")']
+[target."cfg(target_os = \"android\")"]
 
-[target.'cfg(target_os = "android")'.dependencies]
+[target."cfg(target_os = \"android\")".dependencies]
 jni = "0.21"
 
-[target.'cfg(target_os = "macos")']
+[target."cfg(target_os = \"macos\")"]
 
-[target.'cfg(target_os = "macos")'.dependencies]
+[target."cfg(target_os = \"macos\")".dependencies]
 objc2-app-kit = { version = "0.3", features = [
-  "block2",
-  "NSApplication",
-  "NSResponder",
-  "NSView",
-  "NSWindow",
-  "NSGraphics",
+	"block2",
+	"NSApplication",
+	"NSResponder",
+	"NSView",
+	"NSWindow",
+	"NSGraphics",
 ] }
 objc2-foundation = { version = "0.3", features = [] }
 
-[target.'cfg(target_vendor = "apple")']
+[target."cfg(target_vendor = \"apple\")"]
 
-[target.'cfg(target_vendor = "apple")'.dependencies]
+[target."cfg(target_vendor = \"apple\")".dependencies]
 objc2 = "0.6"
 
 [target."cfg(windows)"]
@@ -105,5 +105,14 @@ softbuffer = { version = "0.4", default-features = false }
 webview2-com = "0.37"
 
 [target."cfg(windows)".dependencies.windows]
-features = ["Win32_Foundation", "Win32_Graphics_Dwm"]
+features = [
+	"Win32_Foundation",
+	"Win32_Graphics_Dwm",
+	"Win32_System_LibraryLoader",
+	"Win32_UI_Input",
+	"Win32_UI_HiDpi",
+	"Win32_UI_Shell",
+	"Win32_UI_Input_KeyboardAndMouse",
+	"Win32_Graphics_Gdi",
+]
 version = "0.61"

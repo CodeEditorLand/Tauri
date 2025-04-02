@@ -62,7 +62,7 @@ workspace = true
 
 [target]
 
-[target.'cfg(target_os = "macos")']
+[target."cfg(target_os = \"macos\")"]
 
-[target.'cfg(target_os = "macos")'.dependencies]
+[target."cfg(target_os = \"macos\")".dependencies]
 plist = { version = "1", optional = true }

@@ -59,7 +59,7 @@
 	"dependencies": {},
 	"devDependencies": {
 		"@playform/build": "0.2.1",
-		"@types/node": "^22.13.5",
+		"@types/node": "^22.14.0",
 		"fast-glob": "3.3.3",
 		"globals": "^16.0.0",
 		"tslib": "^2.8.1"

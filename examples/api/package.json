@@ -35,7 +35,7 @@
 	"devDependencies": {
 		"@iconify-json/codicon": "1.2.14",
 		"@iconify-json/ph": "1.2.2",
-		"@playform/build": "0.2.2",
+		"@playform/build": "0.2.3",
 		"@unocss/extractor-svelte": "66.0.0",
 		"unocss": "66.0.0"
 	},

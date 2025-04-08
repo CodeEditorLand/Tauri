@@ -35,7 +35,7 @@
 	},
 	"devDependencies": {
 		"@codeeditorland/cli": "2.0.0",
-		"@playform/build": "0.2.2"
+		"@playform/build": "0.2.3"
 	},
 	"publishConfig": {
 		"access": "public"

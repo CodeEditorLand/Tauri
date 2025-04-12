@@ -1747,6 +1747,10 @@ pub struct WindowConfig {
   /// Whether we should disable JavaScript code execution on the webview or not.
   #[serde(default, alias = "javascript-disabled")]
   pub javascript_disabled: bool,
+  /// on macOS and iOS there is a link preview on long pressing links, this is enabled by default.
+  /// see https://docs.rs/objc2-web-kit/latest/objc2_web_kit/struct.WKWebView.html#method.allowsLinkPreview
+  #[serde(default = "default_true", alias = "allow-link-preview")]
+  pub allow_link_preview: bool,
 }
 
 impl Default for WindowConfig {
@@ -1802,6 +1806,7 @@ impl Default for WindowConfig {
       background_color: None,
       background_throttling: None,
       javascript_disabled: false,
+      allow_link_preview: true,
     }
   }
 }
@@ -3104,6 +3109,7 @@ mod build {
       let background_color = opt_lit(self.background_color.as_ref());
       let background_throttling = opt_lit(self.background_throttling.as_ref());
       let javascript_disabled = self.javascript_disabled;
+      let allow_link_preview = self.allow_link_preview;
 
       literal_struct!(
         tokens,
@@ -3157,7 +3163,8 @@ mod build {
         devtools,
         background_color,
         background_throttling,
-        javascript_disabled
+        javascript_disabled,
+        allow_link_preview
       );
     }
   }
@@ -3477,6 +3484,9 @@ mod build {
 
   impl ToTokens for TrayIconConfig {
     fn to_tokens(&self, tokens: &mut TokenStream) {
+      // For [`Self::menu_on_left_click`]
+      tokens.append_all(quote!(#[allow(deprecated)]));
+
       let id = opt_str_lit(self.id.as_ref());
       let icon_as_template = self.icon_as_template;
       #[allow(deprecated)]

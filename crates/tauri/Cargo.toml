@@ -1,8 +1,156 @@
+[package]
+name = "tauri"
+version = "2.4.1"
+description = "Make tiny, secure apps for all desktop platforms with Tauri"
+exclude = ["/test", "/.scripts", "CHANGELOG.md", "/target"]
+readme = "README.md"
+links = "Tauri"
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[package.metadata.docs.rs]
+no-default-features = true
+features = [
+  "wry",
+  "unstable",
+  "custom-protocol",
+  "tray-icon",
+  "devtools",
+  "image-png",
+  "protocol-asset",
+  "test",
+  "specta",
+]
+rustc-args = ["--cfg", "docsrs"]
+rustdoc-args = ["--cfg", "docsrs"]
+default-target = "x86_64-unknown-linux-gnu"
+targets = [
+  "x86_64-pc-windows-msvc",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "x86_64-linux-android",
+  "x86_64-apple-ios",
+]
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["reqwest"]
+build = ["tauri-build"]
+development = ["quickcheck_macros"]
+
+[dependencies]
+serde_json = { version = "1", features = ["raw_value"] }
+serde = { version = "1", features = ["derive", "rc"] }
+tokio = { version = "1", features = [
+  "rt",
+  "rt-multi-thread",
+  "sync",
+  "fs",
+  "io-util",
+] }
+futures-util = "0.3"
+uuid = { version = "1", features = ["v4"], optional = true }
+url = "2"
+anyhow = "1"
+thiserror = "2"
+tauri-runtime = { version = "2.5.1", path = "../tauri-runtime" }
+tauri-macros = { version = "2.1.1", path = "../tauri-macros" }
+tauri-utils = { version = "2.3.1", features = [
+  "resources",
+], path = "../tauri-utils" }
+tauri-runtime-wry = { version = "2.5.1", path = "../tauri-runtime-wry", optional = true }
+getrandom = "0.2"
+serde_repr = "0.1"
+http = "1"
+dirs = "6"
+percent-encoding = "2"
+raw-window-handle = { version = "0.6", features = ["std"] }
+glob = "0.3"
+urlpattern = "0.3"
+mime = "0.3"
+data-url = { version = "0.3", optional = true }
+serialize-to-javascript = "=0.1.1"
+image = { version = "0.25", default-features = false, optional = true }
+http-range = { version = "0.1", optional = true }
+tracing = { version = "0.1", optional = true }
+heck = "0.5"
+log = "0.4.21"
+dunce = "1"
+specta = { version = "^2.0.0-rc.16", optional = true, default-features = false, features = [
+  "function",
+  "derive",
+] }
+
+# desktop
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "windows", target_os = "macos"))'.dependencies]
+muda = { version = "0.16", default-features = false, features = ["serde"] }
+tray-icon = { version = "0.20", default-features = false, features = [
+  "serde",
+], optional = true }
+
+# linux
+[target.'cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
+gtk = { version = "0.18", features = ["v3_24"] }
+webkit2gtk = { version = "=2.0.1", features = ["v2_40"], optional = true }
+
+# macOS
+[target.'cfg(target_os = "macos")'.dependencies]
+embed_plist = "1.2"
+plist = "1"
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = [
+  "std",
+  "NSData",
+  "NSThread",
+] }
+objc2-app-kit = { version = "0.3", default-features = false, features = [
+  "std",
+  "NSApplication",
+  "NSColor",
+  "NSResponder",
+  "NSView",
+  "NSWindow",
+  "NSImage",
+] }
+window-vibrancy = "0.6"
+
+# windows
+[target."cfg(windows)".dependencies]
+webview2-com = { version = "0.37", optional = true }
+window-vibrancy = "0.6"
+windows = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_UI",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+# mobile
+[target.'cfg(any(target_os = "android", all(target_vendor = "apple", not(target_os = "macos"))))'.dependencies]
+bytes = { version = "1", features = ["serde"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "json",
+  "stream",
+
+] }
+
+# android
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+
+# UIKit, i.e. iOS/tvOS/watchOS/visionOS
+[target.'cfg(all(target_vendor = "apple", not(target_os = "macos")))'.dependencies]
+libc = "0.2"
+swift-rs = "1"
+
 [build-dependencies]
 glob = "0.3"
 heck = "0.5"
-tauri-build = { path = "../tauri-build/", default-features = false, version = "2.1.0" }
-tauri-utils = { path = "../tauri-utils/", version = "2.3.0", features = [
+tauri-build = { path = "../tauri-build/", default-features = false, version = "2.1.1" }
+tauri-utils = { path = "../tauri-utils/", version = "2.3.1", features = [
   "build",
 ] }
 

@@ -10,8 +10,13 @@ use std::{
 	process::{Command, Stdio},
 };
 
-use http::{header::*, response::Builder as ResponseBuilder, status::StatusCode};
-use http_range::HttpRange;
+fn get_stream_response(
+  request: http::Request<Vec<u8>>,
+) -> Result<http::Response<Vec<u8>>, Box<dyn std::error::Error>> {
+  // skip leading `/`
+  let path = percent_encoding::percent_decode(&request.uri().path().as_bytes()[1..])
+    .decode_utf8_lossy()
+    .to_string();
 
 fn get_stream_response(request: http::Request<Vec<u8>>) -> Result<http::Response<Vec<u8>>, Box<dyn std::error::Error>> {
 	// skip leading `/`

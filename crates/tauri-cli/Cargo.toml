@@ -1,32 +1,46 @@
+[package]
+name = "tauri-cli"
+version = "2.4.1"
+authors = ["Tauri Programme within The Commons Conservancy"]
+edition = "2021"
+rust-version = "1.77.2"
+categories = ["gui", "web-programming"]
+license = "Apache-2.0 OR MIT"
+homepage = "https://tauri.app"
+repository = "https://github.com/tauri-apps/tauri"
+description = "Command line interface for building Tauri apps"
+include = [
+  "src/",
+  "/templates",
+  "scripts/",
+  "*.json",
+  "*.rs",
+  "tauri.gitignore",
+  "tauri-dev-watcher.gitignore",
+  "LICENSE*",
+]
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/tauri-cli-v{ version }/cargo-tauri-{ target }.{ archive-format }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-fmt = "zip"
+
 [[bin]]
 name = "cargo-tauri"
 path = "Source/main.rs"
 
 [dependencies]
 anyhow = "1"
-axum = { version = "0.8", features = ["ws"] }
-base64 = "0.22"
-clap = { version = "4", features = ["derive", "env"] }
-clap_complete = "4"
-colored = "3"
-common-path = "1"
-css-color = "0.2"
-ctrlc = "3"
-dialoguer = "0.11"
-duct = "0.13"
-dunce = "1"
-elf = "0.7"
-env_logger = "0.11"
-glob = "0.3"
-handlebars = "6"
-heck = "0.5"
-html5ever = "0.30"
-icns = { package = "tauri-icns", version = "0.1" }
-ignore = "0.4"
-image = { version = "0.25", default-features = false, features = ["ico"] }
-include_dir = "0.7"
-itertools = "0.14"
-json-patch = "4"
+tauri-bundler = { version = "2.3.1", default-features = false, path = "../tauri-bundler" }
+colored = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
 json5 = "0.4"
 jsonrpsee = { version = "0.24", features = ["server"] }
 jsonrpsee-client-transport = { version = "0.24", features = ["ws"] }
@@ -56,9 +70,10 @@ serde = { version = "1", features = ["derive"] }
 serde-value = "0.7"
 serde_json = { version = "1", features = ["preserve_order"] }
 shared_child = "1"
-sublime_fuzzy = "0.7"
-tauri-bundler = { version = "2.3.0", default-features = false, path = "../tauri-bundler" }
-tauri-utils = { version = "2.3.0", path = "../tauri-utils", features = [
+duct = "0.13"
+toml_edit = { version = "0.22", features = ["serde"] }
+json-patch = "3"
+tauri-utils = { version = "2.3.1", path = "../tauri-utils", features = [
   "isolation",
   "schema",
   "config-json5",

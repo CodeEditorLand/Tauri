@@ -30,7 +30,7 @@
 	"dependencies": {},
 	"devDependencies": {
 		"@playform/build": "0.2.3",
-		"wrangler": "4.12.0"
+		"wrangler": "4.13.0"
 	},
 	"publishConfig": {
 		"access": "public"

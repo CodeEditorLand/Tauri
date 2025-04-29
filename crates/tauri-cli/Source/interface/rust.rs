@@ -22,7 +22,8 @@ use notify_debouncer_full::new_debouncer;
 use serde::{Deserialize, Deserializer};
 use tauri_bundler::{
   AppCategory, AppImageSettings, BundleBinary, BundleSettings, DebianSettings, DmgSettings,
-  MacOsSettings, PackageSettings, Position, RpmSettings, Size, UpdaterSettings, WindowsSettings,
+  IosSettings, MacOsSettings, PackageSettings, Position, RpmSettings, Size, UpdaterSettings,
+  WindowsSettings,
 };
 use tauri_utils::config::{parse::is_configuration_file, DeepLinkProtocol, Updater};
 
@@ -1016,24 +1017,26 @@ impl RustAppSettings {
       .workspace
       .and_then(|v| v.package);
 
+    let version = config.version.clone().unwrap_or_else(|| {
+      cargo_package_settings
+        .version
+        .clone()
+        .expect("Cargo manifest must have the `package.version` field")
+        .resolve("version", || {
+          ws_package_settings
+            .as_ref()
+            .and_then(|p| p.version.clone())
+            .ok_or_else(|| anyhow::anyhow!("Couldn't inherit value for `version` from workspace"))
+        })
+        .expect("Cargo project does not have a version")
+    });
+
     let package_settings = PackageSettings {
       product_name: config
         .product_name
         .clone()
         .unwrap_or_else(|| cargo_package_settings.name.clone()),
-      version: config.version.clone().unwrap_or_else(|| {
-        cargo_package_settings
-          .version
-          .clone()
-          .expect("Cargo manifest must have the `package.version` field")
-          .resolve("version", || {
-            ws_package_settings
-              .as_ref()
-              .and_then(|p| p.version.clone())
-              .ok_or_else(|| anyhow::anyhow!("Couldn't inherit value for `version` from workspace"))
-          })
-          .expect("Cargo project does not have a version")
-      }),
+      version: version.clone(),
       description: cargo_package_settings
         .description
         .clone()
@@ -1145,22 +1148,29 @@ pub(crate) fn get_cargo_metadata() -> crate::Result<CargoMetadata> {
   Ok(serde_json::from_slice(&output.stdout)?)
 }
 
+/// Get the cargo target directory based on the provided arguments.
+/// If "--target-dir" is specified in args, use it as the target directory (relative to current directory).
+/// Otherwise, use the target directory from cargo metadata.
+pub(crate) fn get_cargo_target_dir(args: &[String]) -> crate::Result<PathBuf> {
+  let path = if let Some(target) = get_cargo_option(args, "--target-dir") {
+    std::env::current_dir()?.join(target)
+  } else {
+    get_cargo_metadata()
+      .with_context(|| "failed to get cargo metadata")?
+      .target_directory
+  };
+
+  Ok(path)
+}
+
 /// This function determines the 'target' directory and suffixes it with the profile
 /// to determine where the compiled binary will be located.
 fn get_target_dir(triple: Option<&str>, options: &Options) -> crate::Result<PathBuf> {
-  let mut path = if let Some(target) = get_cargo_option(&options.args, "--target-dir") {
-    std::env::current_dir()?.join(target)
-  } else {
-    let mut path = get_cargo_metadata()
-      .with_context(|| "failed to get cargo metadata")?
-      .target_directory;
+  let mut path = get_cargo_target_dir(&options.args)?;
 
-    if let Some(triple) = triple {
-      path.push(triple);
-    }
-
-    path
-  };
+  if let Some(triple) = triple {
+    path.push(triple);
+  }
 
   path.push(get_profile_dir(options));
 
@@ -1418,9 +1428,13 @@ fn tauri_config_to_bundle_settings(
         y: config.macos.dmg.application_folder_position.y,
       },
     },
+    ios: IosSettings {
+      bundle_version: config.ios.bundle_version,
+    },
     macos: MacOsSettings {
       frameworks: config.macos.frameworks,
       files: config.macos.files,
+      bundle_version: config.macos.bundle_version,
       minimum_system_version: config.macos.minimum_system_version,
       exception_domain: config.macos.exception_domain,
       signing_identity,
@@ -1626,7 +1640,10 @@ mod tests {
     );
     assert_eq!(
       get_target_dir(Some("x86_64-pc-windows-msvc"), &options).unwrap(),
-      current_dir.join("path/to/some/dir/release")
+      current_dir
+        .join("path/to/some/dir")
+        .join("x86_64-pc-windows-msvc")
+        .join("release")
     );
 
     let options = Options {

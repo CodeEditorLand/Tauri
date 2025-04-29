@@ -31,7 +31,7 @@ path = "Source/lib.rs"
 
 [package]
 name = "tauri-runtime-wry"
-version = "2.5.1"
+version = "2.6.0"
 description = "Wry bindings to the Tauri runtime"
 exclude = ["CHANGELOG.md", "/target"]
 name = "tauri-runtime-wry"
@@ -62,15 +62,15 @@ rustc-args = ["--cfg", "docsrs"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-wry = { version = "0.51", default-features = false, features = [
+wry = { version = "0.51.2", default-features = false, features = [
   "drag-drop",
   "protocol",
   "os-webview",
   "linux-body",
 ] }
 tao = { version = "0.33", default-features = false, features = ["rwh_06"] }
-tauri-runtime = { version = "2.5.1", path = "../tauri-runtime" }
-tauri-utils = { version = "2.3.1", path = "../tauri-utils" }
+tauri-runtime = { version = "2.6.0", path = "../tauri-runtime" }
+tauri-utils = { version = "2.4.0", path = "../tauri-utils" }
 raw-window-handle = "0.6"
 http = "1"
 url = "2"
@@ -91,7 +91,20 @@ gtk = { version = "0.18", features = ["v3_24"] }
 percent-encoding = "2"
 webkit2gtk = { version = "=2.0", features = ["v2_40"] }
 
-[target."cfg(target_os = \"android\")"]
+[target.'cfg(target_vendor = "apple")'.dependencies]
+objc2 = "0.6"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-foundation = { version = "0.3", features = [] }
+objc2-app-kit = { version = "0.3", features = [
+  "block2",
+  "NSApplication",
+  "NSResponder",
+  "NSView",
+  "NSWindow",
+  "NSScreen",
+  "NSGraphics",
+] }
 
 [target."cfg(target_os = \"android\")".dependencies]
 jni = "0.21"

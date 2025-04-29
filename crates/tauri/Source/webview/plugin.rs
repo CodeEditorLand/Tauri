@@ -15,6 +15,7 @@ mod desktop_commands {
   use serde::{Deserialize, Serialize};
   use tauri_runtime::dpi::{Position, Size};
   use tauri_utils::config::{BackgroundThrottlingPolicy, WebviewUrl, WindowConfig};
+  use url::Url;
 
   use super::*;
   use crate::{
@@ -46,6 +47,8 @@ mod desktop_commands {
     window_effects: Option<WindowEffectsConfig>,
     #[serde(default)]
     incognito: bool,
+    #[serde(alias = "proxy-url")]
+    pub proxy_url: Option<Url>,
     #[serde(default)]
     zoom_hotkeys_enabled: bool,
     #[serde(default)]
@@ -54,6 +57,8 @@ mod desktop_commands {
     javascript_disabled: bool,
     #[serde(default = "default_true")]
     allow_link_preview: bool,
+    #[serde(default)]
+    pub disable_input_accessory_view: bool,
   }
 
   #[cfg(feature = "unstable")]
@@ -68,10 +73,20 @@ mod desktop_commands {
       builder.webview_attributes.accept_first_mouse = config.accept_first_mouse;
       builder.webview_attributes.window_effects = config.window_effects;
       builder.webview_attributes.incognito = config.incognito;
+      builder.webview_attributes.proxy_url = config.proxy_url;
       builder.webview_attributes.zoom_hotkeys_enabled = config.zoom_hotkeys_enabled;
       builder.webview_attributes.background_throttling = config.background_throttling;
       builder.webview_attributes.javascript_disabled = config.javascript_disabled;
       builder.webview_attributes.allow_link_preview = config.allow_link_preview;
+      #[cfg(target_os = "ios")]
+      if config.disable_input_accessory_view {
+        builder
+          .webview_attributes
+          .input_accessory_view_builder
+          .replace(tauri_runtime::InputAccessoryViewBuilder::new(Box::new(
+            |_webview| None,
+          )));
+      }
       builder
     }
   }
@@ -205,6 +220,7 @@ mod desktop_commands {
   setter!(set_webview_size, set_size, Size);
   setter!(set_webview_position, set_position, Position);
   setter!(set_webview_focus, set_focus);
+  setter!(set_webview_auto_resize, set_auto_resize, bool);
   setter!(webview_hide, hide);
   setter!(webview_show, show);
   setter!(set_webview_zoom, set_zoom, f64);
@@ -295,6 +311,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
         desktop_commands::set_webview_size,
         desktop_commands::set_webview_position,
         desktop_commands::set_webview_focus,
+        desktop_commands::set_webview_auto_resize,
         desktop_commands::set_webview_background_color,
         desktop_commands::set_webview_zoom,
         desktop_commands::webview_hide,

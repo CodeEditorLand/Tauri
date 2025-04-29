@@ -218,9 +218,12 @@ pub use {
   },
   self::manager::Asset,
   self::runtime::{
-    dpi::{LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize, Pixel, Position, Size},
+    dpi::{
+      LogicalPosition, LogicalRect, LogicalSize, PhysicalPosition, PhysicalRect, PhysicalSize,
+      Pixel, Position, Rect, Size,
+    },
     window::{CursorIcon, DragDropEvent, WindowSizeConstraints},
-    DeviceEventFilter, Rect, UserAttentionType,
+    DeviceEventFilter, UserAttentionType,
   },
   self::state::{State, StateManager},
   self::utils::{
@@ -745,11 +748,12 @@ pub trait Manager<R: Runtime>: sealed::ManagerBase<R> {
   where
     T: Send + Sync + 'static,
   {
-    self
-      .manager()
-      .state
-      .try_get()
-      .expect("state() called before manage() for given type")
+    self.manager().state.try_get().unwrap_or_else(|| {
+      panic!(
+        "state() called before manage() for {}",
+        std::any::type_name::<T>()
+      )
+    })
   }
 
   /// Attempts to retrieve the managed state for the type `T`.

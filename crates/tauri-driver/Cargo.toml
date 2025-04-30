@@ -26,9 +26,29 @@ hyper-util = { version = "0.1", features = [
 ] }
 pico-args = "0.5"
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde_json = { version = "1" }
 tokio = { version = "1", features = ["macros"] }
 which = "7"
+
+[lib]
+path = "Source/lib.rs"
+
+[package]
+authors = ["Tauri Programme within The Commons Conservancy"]
+categories = ["gui", "web-programming"]
+description = "Webdriver server for Tauri applications"
+edition = "2024"
+homepage = "https://tauri.app"
+license-file = "LICENSE"
+name = "tauri-driver"
+readme = "README.md"
+repository = "https://github.com/tauri-apps/tauri"
+rust-version = "1.85.0"
+version = "2.0.3"
+
+[target]
+
+[target."cfg(unix)"]
 
 [target."cfg(unix)".dependencies]
 signal-hook = "0.3"

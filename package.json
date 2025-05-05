@@ -1,58 +1,42 @@
 {
-	"name": "@codeeditorland/workspace",
-	"version": "0.0.1",
-	"private": false,
-	"keywords": [
-		"codeeditorland",
-		"land",
-		"playform"
-	],
-	"homepage": "HTTPS://GitHub.Com/CodeEditorLand/Tauri#readme",
-	"bugs": {
-		"url": "HTTPS://GitHub.Com/CodeEditorLand/Tauri/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+HTTPS://github.com/CodeEditorLand/Tauri.git"
-	},
-	"license": "SEE LICENSE IN LICENSE",
-	"author": {
-		"name": "Source 🖋️ Open 👐🏻",
-		"email": "Source/Open@Editor.Land",
-		"url": "HTTPS://Editor.Land"
-	},
-	"contributors": [
-		"Tauri Programme within The Commons Conservancy"
-	],
-	"type": "module",
-	"scripts": {
-		"build": "pnpm run -r build",
-		"build:api": "pnpm run --filter \"@tauri-apps/api\" build",
-		"build:api:debug": "pnpm run --filter \"@tauri-apps/api\" build:debug",
-		"build:cli": "pnpm run --filter \"@tauri-apps/cli\" build",
-		"build:cli:debug": "pnpm run --filter \"@tauri-apps/cli\" build:debug",
-		"build:debug": "pnpm run -r build:debug",
-		"eslint:check": "pnpm run -r eslint:check",
-		"example:api:dev": "pnpm run --filter \"api\" tauri dev",
-		"prepublishOnly": "Build 'Source/**/*.ts'",
-		"ts:check": "pnpm run -r ts:check"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"@playform/build": "0.2.3"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild",
-			"workerd"
-		],
-		"overrides": {
-			"cookie@<0.7.0": ">=0.7.0",
-			"cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5",
-			"esbuild@<0.25.0": ">=0.25.0"
-		}
-	}
+  "name": "tauri-workspace",
+  "version": "0.0.0",
+  "license": "Apache-2.0 OR MIT",
+  "private": true,
+  "contributors": [
+    "Tauri Programme within The Commons Conservancy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tauri-apps/tauri.git"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "eslint:check": "pnpm run -r eslint:check",
+    "ts:check": "pnpm run -r ts:check",
+    "build": "pnpm run -r build",
+    "build:debug": "pnpm run -r build:debug",
+    "build:api": "pnpm run --filter \"@tauri-apps/api\" build",
+    "build:api:debug": "pnpm run --filter \"@tauri-apps/api\" build:debug",
+    "build:cli": "pnpm run --filter \"@tauri-apps/cli\" build",
+    "build:cli:debug": "pnpm run --filter \"@tauri-apps/cli\" build:debug",
+    "test": "pnpm run -r test",
+    "example:api:dev": "pnpm run --filter \"api\" tauri dev"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  },
+  "packageManager": "pnpm@10.10.0",
+  "pnpm": {
+    "overrides": {
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5",
+      "cookie@<0.7.0": ">=0.7.0",
+      "esbuild@<0.25.0": ">=0.25.0"
+    },
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
+  }
 }

@@ -213,7 +213,7 @@ EOF
     touch "${root}/var/log/lastlog"
 
     cat << 'EOF' > $root/init
-#!/usr/bin/env bash
+#!/bin/busybox sh
 
 set -e
 

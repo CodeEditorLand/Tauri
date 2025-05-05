@@ -18,9 +18,28 @@ exclude = ["CHANGELOG.md", "/target", "rustfmt.toml"]
 tauri-utils = { version = "2.4.0", path = "../tauri-utils", features = [
   "resources",
 ] }
-tempfile = "3"
+image = "0.25"
+flate2 = "1"
+anyhow = "1"
 thiserror = "2"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+strsim = "0.11"
+tar = "0.4"
+walkdir = "2"
+handlebars = "6"
+tempfile = "3"
+log = { version = "0.4.21", features = ["kv"] }
+dirs = "6"
+os_pipe = "1"
 ureq = { version = "3", default-features = false, features = ["socks-proxy"] }
+native-tls = { version = "0.2", optional = true }
+hex = "0.4"
+semver = "1"
+sha1 = "0.10"
+sha2 = "0.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+dunce = "1"
 url = "2"
 uuid = { version = "1", features = ["v4", "v5"] }
 regex = "1"
@@ -58,52 +77,3 @@ default = ["rustls"]
 native-tls = ["ureq/native-tls"]
 native-tls-vendored = ["native-tls", "native-tls/vendored"]
 rustls = ["ureq/rustls"]
-
-[lib]
-name = "tauri_bundler"
-path = "Source/lib.rs"
-
-[package]
-authors = [
-  "George Burton <burtonageo@gmail.com>",
-  "Tauri Programme within The Commons Conservancy",
-]
-categories = ["command-line-utilities", "development-tools::cargo-plugins"]
-description = "Wrap rust executables in OS-specific app bundles for Tauri"
-edition = "2024"
-exclude = ["CHANGELOG.md", "/target", "rustfmt.toml"]
-keywords = ["bundle", "cargo", "tauri"]
-license = "Apache-2.0 OR MIT"
-name = "tauri-bundler"
-repository = "https://github.com/tauri-apps/tauri"
-rust-version = "1.77.2"
-version = "2.3.0"
-
-[target]
-
-[target.'cfg(target_os = "linux")']
-
-[target.'cfg(target_os = "linux")'.dependencies]
-ar = "0.9"
-heck = "0.5"
-md5 = "0.7"
-rpm = { version = "0.17", features = ["bzip2-compression"] }
-
-[target."cfg(target_os = \"macos\")"]
-
-[target."cfg(target_os = \"macos\")".dependencies]
-icns = { package = "tauri-icns", version = "0.1" }
-plist = "1"
-tauri-macos-sign = { version = "2.1.0", path = "../tauri-macos-sign" }
-time = { version = "0.3", features = ["formatting"] }
-
-[target."cfg(target_os = \"windows\")"]
-
-[target."cfg(target_os = \"windows\")".dependencies]
-bitness = "0.4"
-glob = "0.3"
-windows-registry = "0.5"
-
-[target."cfg(target_os = \"windows\")".dependencies.windows-sys]
-features = ["Win32_System_SystemInformation", "Win32_System_Diagnostics_Debug"]
-version = "0.59"

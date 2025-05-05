@@ -21,13 +21,3 @@ dependencies {
     implementation("com.android.tools.build:gradle:8.5.1")
 }
 
-sourceSets {
-    main {
-        kotlin {
-            srcDir("Source/main/kotlin") // instead of src/main/kotlin
-        }
-        resources {
-            srcDir("Source/main/resources")
-        }
-    }
-}

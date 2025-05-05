@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 getcpid() {
     cpids=$(pgrep -P $1|xargs)

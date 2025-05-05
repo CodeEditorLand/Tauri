@@ -1,68 +1,20 @@
-[dependencies]
-anyhow = "1"
-cargo_toml = "0.22"
-dirs = "6"
-glob = "0.3"
-heck = "0.5"
-json-patch = "4"
-quote = { version = "1", optional = true }
-schemars = { version = "0.8.22", features = ["preserve_order"] }
-semver = "1"
-serde = "1"
-serde_json = "1"
-tauri-codegen = { version = "2.1.0", path = "../tauri-codegen", optional = true }
-tauri-utils = { version = "2.3.0", path = "../tauri-utils", features = [
-  "build",
-  "resources",
-] }
-tauri-winres = "0.3"
-toml = "0.8"
-walkdir = "2"
-
-[features]
-codegen = ["tauri-codegen", "quote"]
-config-json = []
-config-json5 = ["tauri-utils/config-json5"]
-config-toml = ["tauri-utils/config-toml"]
-default = ["config-json"]
-isolation = ["tauri-codegen/isolation", "tauri-utils/isolation"]
-
-[lib]
-path = "Source/lib.rs"
-
 [package]
 name = "tauri-build"
 version = "2.2.0"
 description = "build time code to pair with https://crates.io/crates/tauri"
 exclude = ["CHANGELOG.md", "/target"]
-name = "tauri-build"
 readme = "README.md"
-version = "2.1.0"
-
-[package.authors]
-workspace = true
-
-[package.categories]
-workspace = true
-
-[package.edition]
-workspace = true
-
-[package.homepage]
-workspace = true
-
-[package.license-file]
-workspace = true
-
-[package.metadata]
-
-[package.metadata.docs]
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
 default-target = "x86_64-unknown-linux-gnu"
-rustc-args = ["--cfg", "docsrs"]
-rustdoc-args = ["--cfg", "docsrs"]
 targets = [
   "x86_64-pc-windows-msvc",
   "x86_64-unknown-linux-gnu",
@@ -70,6 +22,8 @@ targets = [
   "x86_64-linux-android",
   "x86_64-apple-ios",
 ]
+rustc-args = ["--cfg", "docsrs"]
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 anyhow = "1"
@@ -93,5 +47,10 @@ toml = "0.8"
 # Our code requires at least 0.8.18 so don't simplify this to 0.8
 schemars = { version = "0.8.18", features = ["preserve_order"] }
 
-[package.rust-version]
-workspace = true
+[features]
+default = ["config-json"]
+codegen = ["tauri-codegen", "quote"]
+isolation = ["tauri-codegen/isolation", "tauri-utils/isolation"]
+config-json = []
+config-json5 = ["tauri-utils/config-json5"]
+config-toml = ["tauri-utils/config-toml"]

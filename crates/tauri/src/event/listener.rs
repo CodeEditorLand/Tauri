@@ -16,6 +16,9 @@ use std::{
   },
 };
 
+#[cfg(feature = "land-emit-buffer")]
+use std::collections::VecDeque;
+
 /// What to do with the pending handler when resolving it?
 enum Pending {
   Unlisten(EventId),
@@ -56,11 +59,24 @@ impl JsHandler {
 
 type WebviewLabel = String;
 
+/// LAND-PATCH B3.P3+P7: per-channel replay ring capacity. New
+/// listeners installed after an emit-storm receive the most recent
+/// N events. 4096 covers Land's worst observed boot-race storm
+/// (32 tree-view registers + ~200 commands + ~50 diagnostics) with
+/// margin. Drop-oldest semantics: when the ring is full, the oldest
+/// entry is evicted to make room.
+#[cfg(feature = "land-emit-buffer")]
+const REPLAY_RING_CAPACITY: usize = 4096;
+
 /// Holds event handlers and pending event handlers, along with the salts associating them.
 struct InnerListeners {
   pending: Mutex<Vec<Pending>>,
   handlers: Mutex<HashMap<crate::EventName, HashMap<EventId, Handler>>>,
   js_event_listeners: Mutex<HashMap<WebviewLabel, HashMap<crate::EventName, HashSet<JsHandler>>>>,
+  /// Per-channel ring buffer of recent emits. Drained into a new
+  /// listener at install time; pushed-into on every `emit_filter`.
+  #[cfg(feature = "land-emit-buffer")]
+  replay_buffer: Mutex<HashMap<crate::EventName, VecDeque<EmitArgs>>>,
   function_name: &'static str,
   listeners_object_name: &'static str,
   next_event_id: Arc<AtomicU32>,
@@ -79,6 +95,8 @@ impl Default for Listeners {
         pending: Mutex::default(),
         handlers: Mutex::default(),
         js_event_listeners: Mutex::default(),
+        #[cfg(feature = "land-emit-buffer")]
+        replay_buffer: Mutex::default(),
         function_name: "__internal_unstable_listeners_function_id__",
         listeners_object_name: "__internal_unstable_listeners_object_id__",
         next_event_id: Default::default(),
@@ -138,6 +156,26 @@ impl Listeners {
     match self.inner.handlers.try_lock() {
       Err(_) => self.insert_pending(Pending::Listen { id, event, handler }),
       Ok(mut lock) => {
+        // LAND-PATCH B3.P3+P7: drain the replay ring for this
+        // channel into the new handler before registering. The
+        // handler observes any emits that fired before it
+        // installed, eliminating the boot-race that motivated
+        // the `sky:replay-events` band-aid.
+        #[cfg(feature = "land-emit-buffer")]
+        {
+          if let Ok(buffer) = self.inner.replay_buffer.try_lock() {
+            if let Some(ring) = buffer.get(&event) {
+              for buffered in ring.iter() {
+                if match_any_or_filter(
+                  &handler.target,
+                  &Option::<&dyn Fn(&EventTarget) -> bool>::None,
+                ) {
+                  (handler.callback)(Event::new(id, buffered.payload.clone()));
+                }
+              }
+            }
+          }
+        }
         lock.entry(event).or_default().insert(id, handler);
       }
     }
@@ -192,6 +230,24 @@ impl Listeners {
     F: Fn(&EventTarget) -> bool,
   {
     let mut maybe_pending = false;
+
+    // LAND-PATCH B3.P3+P7: push the emit into the per-channel
+    // replay ring BEFORE dispatching. New listeners installed
+    // after this point will see the event via the ring; existing
+    // listeners receive it via the dispatch below. Drop-oldest
+    // when the ring is full.
+    #[cfg(feature = "land-emit-buffer")]
+    {
+      if let Ok(mut buffer) = self.inner.replay_buffer.try_lock() {
+        let ring = buffer
+          .entry(emit_args.event.clone())
+          .or_insert_with(|| VecDeque::with_capacity(REPLAY_RING_CAPACITY.min(64)));
+        if ring.len() >= REPLAY_RING_CAPACITY {
+          ring.pop_front();
+        }
+        ring.push_back(emit_args.clone());
+      }
+    }
 
     match self.inner.handlers.try_lock() {
       Err(_) => self.insert_pending(Pending::Emit(emit_args)),

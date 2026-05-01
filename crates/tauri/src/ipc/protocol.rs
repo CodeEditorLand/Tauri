@@ -119,7 +119,8 @@ pub fn get<R: Runtime>(manager: Arc<AppManager<R>>) -> UriSchemeProtocolHandler 
                       mime::APPLICATION_OCTET_STREAM,
                     ),
                     InvokeResponse::Err(e) => (
-                      http::Response::new(serde_json::to_vec(&e.0).unwrap().into()),
+                      // LAND-PATCH B3.P1: error-payload serialise routed through the simd-json facade.
+                      http::Response::new(super::json::to_vec(&e.0).unwrap().into()),
                       mime::APPLICATION_JSON,
                     ),
                   };

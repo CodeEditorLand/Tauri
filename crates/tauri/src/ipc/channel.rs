@@ -161,7 +161,8 @@ impl JavaScriptChannelId {
             ))?;
           }
           InvokeResponseBody::Raw(bytes) if bytes.len() < MAX_RAW_DIRECT_EXECUTE_THRESHOLD => {
-            let bytes_as_json_array = serde_json::to_string(&bytes)?;
+            // LAND-PATCH B3.P1: simd-json on the Channel binary fast path.
+            let bytes_as_json_array = super::json::to_string(&bytes)?;
             webview.eval(format_raw_js(callback_id, format!("{{ message: new Uint8Array({bytes_as_json_array}).buffer, index: {current_index} }}")))?;
           }
           // use the fetch API to speed up larger response payloads
@@ -254,7 +255,8 @@ impl<TSend> Channel<TSend> {
             webview.eval(format_raw_js(callback_id, json_string))?;
           }
           InvokeResponseBody::Raw(bytes) if bytes.len() < MAX_RAW_DIRECT_EXECUTE_THRESHOLD => {
-            let bytes_as_json_array = serde_json::to_string(&bytes)?;
+            // LAND-PATCH B3.P1: simd-json on the Channel binary fast path (mirrored callsite).
+            let bytes_as_json_array = super::json::to_string(&bytes)?;
             webview.eval(format_raw_js(
               callback_id,
               format!("new Uint8Array({bytes_as_json_array}).buffer"),

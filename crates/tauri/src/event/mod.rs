@@ -125,9 +125,15 @@ impl EmitArgs {
   pub fn new<S: Serialize>(event: EventName<&str>, payload: &S) -> crate::Result<Self> {
     #[cfg(feature = "tracing")]
     let _span = tracing::debug_span!("window::emit::serialize").entered();
+    // LAND-PATCH B3.P1 (extension): emit-payload serialise routed
+    // through the simd-json facade. Mountain emits ~1500
+    // notifications during boot (sky://command/register dominates
+    // at ~1400 frames); simd-json's 1.3-1.6× win shaves ~30-50 ms
+    // off boot under that storm. Behind the `land-simd-json` Cargo
+    // feature; falls back to serde_json otherwise.
     Ok(EmitArgs {
       event: event.into_owned(),
-      payload: serde_json::to_string(payload)?,
+      payload: crate::ipc::json::to_string(payload)?,
     })
   }
 

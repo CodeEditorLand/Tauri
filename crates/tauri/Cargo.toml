@@ -42,6 +42,17 @@ build = ["tauri-build"]
 development = ["quickcheck_macros"]
 
 [dependencies]
+# LAND-PATCH B3.P1: optional simd-json crate. When the
+# `land-simd-json` feature is on, the IPC serialise hot path in
+# `src/ipc/json.rs` routes through simd_json::to_string instead of
+# serde_json::to_string. simd-json's writer is 1.3-1.6x faster on
+# the structured-flat payloads we serialise (extension manifests,
+# tree-view children, diagnostic batches). Off by default to keep
+# upstream parity.
+simd-json = { version = "0.13", default-features = false, optional = true, features = [
+  "swar-number-parsing",
+  "serde_impl",
+] }
 serde_json = { version = "1", features = ["raw_value"] }
 serde = { version = "1", features = ["derive", "rc"] }
 tokio = { version = "1", features = [
@@ -201,6 +212,11 @@ common-controls-v6 = [
   "tauri-runtime-wry?/common-controls-v6",
 ]
 tray-icon = ["dep:tray-icon"]
+# LAND-PATCH B3.P1: route IPC serialise through simd-json instead of
+# serde_json.
+land-simd-json = ["dep:simd-json"]
+# LAND-PATCH B3.P3+P7: bounded emit ring with replay buffer.
+land-emit-buffer = []
 tracing = ["dep:tracing", "tauri-macros/tracing", "tauri-runtime-wry?/tracing"]
 test = []
 compression = ["tauri-macros/compression", "tauri-utils/compression"]

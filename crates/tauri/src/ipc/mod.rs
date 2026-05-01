@@ -29,6 +29,8 @@ mod capability_builder;
 pub(crate) mod channel;
 mod command;
 pub(crate) mod format_callback;
+// LAND-PATCH B3.P1: simd-json facade for the IPC serialise hot path.
+pub(crate) mod json;
 pub(crate) mod protocol;
 
 pub use authority::{

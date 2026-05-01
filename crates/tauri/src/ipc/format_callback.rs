@@ -81,7 +81,10 @@ fn serialize_js_with<F: FnOnce(&str) -> String>(
 ///
 /// See [`format_raw`] for more information.
 pub fn format<T: Serialize>(function_name: CallbackFn, arg: &T) -> crate::Result<String> {
-  format_raw(function_name, serde_json::to_string(arg)?)
+  // LAND-PATCH B3.P1: route through the simd-json facade. Behind
+  // the `land-simd-json` Cargo feature; falls back to serde_json
+  // otherwise.
+  format_raw(function_name, super::json::to_string(arg)?)
 }
 
 /// Formats a function name and a raw JSON string argument to be evaluated as callback.

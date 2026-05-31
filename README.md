@@ -66,15 +66,15 @@ Documentation in a polyglot system is a tricky proposition. To this end, we pref
 ## Partners
 
 <table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://crabnebula.dev" target="_blank">
-          <img src=".github/sponsors/crabnebula.svg" alt="CrabNebula" width="283">
-        </a>
-      </td>
-    </tr>
-  </tbody>
+	<tbody>
+		<tr>
+			<td align="center" valign="middle">
+				<a href="https://crabnebula.dev" target="_blank">
+					<img src=".github/sponsors/crabnebula.svg" alt="CrabNebula" width="283" />
+				</a>
+			</td>
+		</tr>
+	</tbody>
 </table>
 
 For the complete list of sponsors please visit our [website](https://tauri.app#sponsors) and [Open Collective](https://opencollective.com/tauri).

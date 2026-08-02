@@ -25,8 +25,8 @@
     "example:api:dev": "pnpm run --filter \"api\" tauri dev"
   },
   "devDependencies": {
-    "prettier": "^3.9.5"
+    "prettier": "^3.9.6"
   },
   "minimumReleaseAge": 4320,
-  "packageManager": "pnpm@11.15.0"
+  "packageManager": "pnpm@11.18.0"
 }

@@ -41,8 +41,8 @@
     ]
   },
   "devDependencies": {
-    "@napi-rs/cli": "3.7.3",
-    "@types/node": "^26.1.1",
+    "@napi-rs/cli": "3.8.2",
+    "@types/node": "^26.1.2",
     "cross-env": "10.1.0",
     "vitest": "^4.1.10"
   },
